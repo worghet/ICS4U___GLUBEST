@@ -1,9 +1,18 @@
 void setup() {
-  // put your setup code here, to run once:
+  Serial.begin(9600);
+  pinMode(12, OUTPUT);
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  byte blinks;
 
+  if (Serial.available()) {
+     blinks = Serial.read();
+
+     for (byte i = 1; i <= 2*blinks; i++) {
+        digitalWrite(12, !digitalRead(12));
+        delay(200);
+     }
+  }
 }
