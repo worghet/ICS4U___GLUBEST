@@ -1,0 +1,30 @@
+body {
+
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.video-feed-title {
+    margin: 0;
+    margin-bottom: 2%;
+    padding: 0;
+    font-family: monospace;
+    font-size: 4em;
+    font-weight: bold;
+}
+
+#video-feed-box {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    height: 490px;
+    width: 640px;
+}
+
