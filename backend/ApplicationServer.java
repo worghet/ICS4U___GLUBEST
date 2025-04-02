@@ -12,16 +12,22 @@ import java.util.regex.Pattern;
 // == APPLICATION SERVER ===============================
 public class ApplicationServer extends WebSocketServer {
 
+
   // == SERVER INSTANCE INFO ===========================
+
 
   int serverPort;
 
+
   // == CONSTANT ENDPOINT APIS =========================
+
 
   private static String SEND_WEBCAM_API = "/send-cam-data";
   private static String GET_WEBCAM_DATA_API = "/get-cam-data";
 
+
   // == MAIN (TO BE RUN ON AWS) ========================
+
 
   public static void main(String[] args) {
     System.out.print("WHAT PORT? ");
@@ -67,16 +73,22 @@ public class ApplicationServer extends WebSocketServer {
 
   // == WEBSOCKET SERVER METHODS ============================
 
+  // What to do when someone connects.
+
   @Override
   public void onOpen(WebSocket conn, ClientHandshake handshake) {
     System.out.println("SOMEONE CONNECTED");
 
   }
 
+  // What to do on disconnection.
+
   @Override
   public void onClose(WebSocket conn, int code, String reason, boolean remote) {
 
   }
+
+  // What to do when a message is recieved.
 
   @Override
   public void onMessage(WebSocket conn, String message) {
