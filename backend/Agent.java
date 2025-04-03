@@ -68,7 +68,8 @@ public class Agent {
         // only proceed if all are initialized.
         if (agent.initializedSerialPort() && agent.initializedWebcam() && agent.initializeWebSocketClient()) {
 
-            System.out.println("SETUP | OK");
+            System.out.print("AGENT INIT | ");
+            ApplicationServer.reportToConsole("SUCCESS", ApplicationServer.OKAY);
 
             // Setup the thread for sending webcam data.
             agent.webcamSendingThread = new Thread() {
@@ -96,7 +97,8 @@ public class Agent {
                             Thread.sleep(1000 / WEBCAM_SENDING_FPS);
                         }
                     } catch (Exception exception) {
-                        System.out.println("SOMETHING IN WRONG WHEN SENDING WEBCAM!!!" + exception.getMessage());
+                        System.out.print("ERROR | ");
+                        ApplicationServer.reportToConsole("COULDN'T SEND WEBCAM", ApplicationServer.ERROR);
                     }
                 }
             };
@@ -128,11 +130,12 @@ public class Agent {
 
         // Check port availibility.
         if (!serialPort.openPort()) {
-            System.out.println("Oops! Port not availible..");
+            System.out.print("ERROR | ");
+            ApplicationServer.reportToConsole("ARDUINO PORT UNAVAILIBLE", ApplicationServer.ERROR);
+
             return false;
         }
 
-        System.out.println("port is open!!");
         return true;
     }
 
@@ -153,7 +156,9 @@ public class Agent {
 
             // Print a message, and return false to prevent condition in factory from being
             // true.
-            System.out.println("Something went wrong while initializing camera..");
+            System.out.print("ERROR | ");
+            ApplicationServer.reportToConsole("COULDN'T INITIALIZE WEBCAM", ApplicationServer.ERROR);
+
             return false;
         }
 
@@ -175,8 +180,8 @@ public class Agent {
     public boolean initializeWebSocketClient() {
         try {
 
-            // Recognize the server location (via URI).
-            URI serverUri = URI.create("ws://127.0.0.1:8000");
+            // Recognize the server location (via URI) + Identify that this is the agent (more efficient).
+            URI serverUri = URI.create("ws://127.0.0.1:8000/agent");
 
             // Initialize the websocket client.
             webSocketClient = new WebSocketClient(serverUri) {
@@ -185,8 +190,7 @@ public class Agent {
 
                 @Override
                 public void onOpen(ServerHandshake handshake) {
-                    System.out.println("CONNECTION SUCCESSFUL");
-                    this.send("I am the agent.. super sneaky!");
+                    ApplicationServer.reportToConsole("", WEBCAM_SENDING_FPS);
 
                 }
 
@@ -201,7 +205,9 @@ public class Agent {
 
                         // Try to perform the arduino action.
                         try {
-                            System.out.println("CAT IS BEING FED NOW..");
+                            System.out.print("ACTION | ");
+                            ApplicationServer.reportToConsole("FEEDING CAT", ApplicationServer.INTERESTING);
+    
                             performArduinoRotation();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -210,14 +216,10 @@ public class Agent {
                 }
 
                 @Override
-                public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("WebSocket closed: " + reason);
-                }
+                public void onClose(int code, String reason, boolean remote) {}
 
                 @Override
-                public void onError(Exception ex) {
-                    ex.printStackTrace();
-                }
+                public void onError(Exception ex) {}
             };
 
         }
@@ -236,6 +238,7 @@ public class Agent {
 
         int peopleViewing;
         String formattedLastTimeFed;
+
 
     }
 

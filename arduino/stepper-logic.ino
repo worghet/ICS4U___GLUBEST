@@ -32,7 +32,7 @@ void loop() {
 
     // (Technically unnessicary) Ensure feed matches requested one.
     if (input == "FEED") {
-      stepper.step(STEPS_PER_REVOLUTION / 4);
+      stepper.step(STEPS_PER_REVOLUTION / 4); // Rotate 90 degrees.
     }
   }
 }

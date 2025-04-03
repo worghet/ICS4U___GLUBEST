@@ -31,17 +31,15 @@ function setupWebsocketClient() {
     // Establish relavant methods.
 
 
-    socket.onopen = function (event) {
-        socket.send("I am a connected client!"); // Example message
-    };
+    socket.onopen = function (event) {};
 
     socket.onmessage = function (event) {
         // repeatedly (smoothly), update the image.
-        requestAnimationFrame(function() {
+
             VIDEO_FEED_BOX.style.backgroundImage = "url('data:image/png;base64," + event.data + "')";
             VIDEO_FEED_BOX.style.backgroundSize = "cover";
             VIDEO_FEED_BOX.style.backgroundPosition = "center";
-        });
+    
 
     };
 
@@ -53,7 +51,6 @@ function setupWebsocketClient() {
 }
 
 function feed() {
-
     socket.send("FEED");
-    console.log("fed cat")
 }
+
