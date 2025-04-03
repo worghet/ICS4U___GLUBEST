@@ -2,6 +2,8 @@
 // CONSTANTS
 const FEEDER_API = "127.0.0.1:8000";
 const VIDEO_FEED_BOX = document.getElementById("video-feed-box");
+const socket = new WebSocket(`ws://${FEEDER_API}`);
+
 
 
 // ON OPEN, CONNECT (SWITCH TO THE PROPER API)
@@ -9,7 +11,7 @@ window.onload = function () {
 
     try {
         console.log(VIDEO_FEED_BOX)
-        connectToAPI(FEEDER_API);
+        setupWebsocketClient();
         console.log("Successfully connected to:", FEEDER_API);
     }
     catch (exception) {
@@ -21,10 +23,9 @@ window.onload = function () {
 
 // == OTHER FUNCTIONS ========================================
 
-function connectToAPI(apiUrl) {
+function setupWebsocketClient() {
 
     // Setup socket connection.
-    const socket = new WebSocket(`ws://${apiUrl}`);
 
 
     // Establish relavant methods.
@@ -35,8 +36,6 @@ function connectToAPI(apiUrl) {
     };
 
     socket.onmessage = function (event) {
-        console.log(event.data)
-
         // repeatedly (smoothly), update the image.
         requestAnimationFrame(function() {
             VIDEO_FEED_BOX.style.backgroundImage = "url('data:image/png;base64," + event.data + "')";
@@ -51,4 +50,10 @@ function connectToAPI(apiUrl) {
     socket.onclose = function (event) {};
     socket.onerror = function (event) {};
 
+}
+
+function feed() {
+
+    socket.send("FEED");
+    console.log("fed cat")
 }

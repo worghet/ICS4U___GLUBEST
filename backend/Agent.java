@@ -15,32 +15,24 @@ import java.net.URI;
 // == AGENT ========
 public class Agent {
 
-
     // == CLASS CONSTANTS ========================================
-
 
     private static final String SERIAL_PORT_NAME = "/dev/ttyACM0"; // linux-specific.
     private static final String FEED_KEYWORD = "FEED";
     private static final int WEBCAM_SENDING_FPS = 30;
 
-
     // == FUNCTIONAL CONSTANTS ===================================
-
 
     final static Scanner input = new Scanner(System.in);
 
-
     // == INSTANCE VARIABLES =====================================
-
 
     WebSocketClient webSocketClient; // Websocket client itself.
     Thread webcamSendingThread; // Separate thread meant to send webcam data.
     SerialPort serialPort; // Port access to write to Arduino.
     Webcam webcam; // Webcam object.
 
-
     // == MAIN ====================================================
-
 
     // This main will be run on the agent computer.
     public static void main(String[] args) {
@@ -49,7 +41,9 @@ public class Agent {
         Agent agent = createAgent();
 
         // Start processes.
-        if (agent != null) { agent.startOperating();}
+        if (agent != null) {
+            agent.startOperating();
+        }
 
     }
 
@@ -57,26 +51,24 @@ public class Agent {
 
         // Connect to the server.
         webSocketClient.connect();
-        
+
         // Start sending the webcam data.
         webcamSendingThread.start();
-    
+
     }
 
-
     // == OBJECT FACTORY ===========================================
-
 
     public static Agent createAgent() {
 
         // Create default agent object.
         Agent agent = new Agent();
 
-        // Initialize all components: serialPort, webcam, and the websocket connection; only proceed if all are initialized.
+        // Initialize all components: serialPort, webcam, and the websocket connection;
+        // only proceed if all are initialized.
         if (agent.initializedSerialPort() && agent.initializedWebcam() && agent.initializeWebSocketClient()) {
-            
-            System.out.println("SETUP | OK");
 
+            System.out.println("SETUP | OK");
 
             // Setup the thread for sending webcam data.
             agent.webcamSendingThread = new Thread() {
@@ -90,7 +82,8 @@ public class Agent {
                             // Read image from webcam.
                             BufferedImage image = agent.webcam.getImage();
 
-                            // Take the image, and rewrite it in Base64; as we can't simply send png over network.
+                            // Take the image, and rewrite it in Base64; as we can't simply send png over
+                            // network.
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                             ImageIO.write(image, "PNG", byteArrayOutputStream);
                             byte[] imageBytes = byteArrayOutputStream.toByteArray();
@@ -102,51 +95,51 @@ public class Agent {
                             // Pause sending (to prevent overflow) momentarily.
                             Thread.sleep(1000 / WEBCAM_SENDING_FPS);
                         }
-                    } 
-                    catch (Exception exception) {
+                    } catch (Exception exception) {
                         System.out.println("SOMETHING IN WRONG WHEN SENDING WEBCAM!!!" + exception.getMessage());
                     }
                 }
             };
-            
+
             // If all initiallization was good, return the agent as a new object.
             return agent;
-            
-        } 
-        else {
+
+        } else {
 
             // Otherwise, print error message.
             System.err.println("Something went wrong within the initialization process.");
-        
+
         }
 
         return null;
 
     }
 
-
     // == INITIALIZOR METHODS ======================================
- 
 
     private boolean initializedSerialPort() {
 
-        // Setup serial port (parameters: int baud rate, data size in bits, num stop bits, parity bits).
-        // serialPort.setComPortParameters(9600, 8, 1, 0);
 
-        // // Check port availibility.
-        // if (!serialPort.openPort()) {
-        // System.out.println("Oops! Port not availible..");
-        // return false;
-        // }
+        serialPort = SerialPort.getCommPort(SERIAL_PORT_NAME);
 
-        // System.out.println("port is open!!");
+        // Setup serial port (parameters: int baud rate, data size in bits, num stop
+        // bits, parity bits).
+        serialPort.setComPortParameters(9600, 8, 1, 0);
+
+        // Check port availibility.
+        if (!serialPort.openPort()) {
+            System.out.println("Oops! Port not availible..");
+            return false;
+        }
+
+        System.out.println("port is open!!");
         return true;
     }
 
     private boolean initializedWebcam() {
 
         try {
-        
+
             // Get the default camera (whichever one can be found).
             webcam = Webcam.getDefault();
 
@@ -156,10 +149,10 @@ public class Agent {
             // Open (start) the webcam.
             webcam.open();
 
-        } 
-        catch (Exception exception) {
+        } catch (Exception exception) {
 
-            // Print a message, and return false to prevent condition in factory from being true.
+            // Print a message, and return false to prevent condition in factory from being
+            // true.
             System.out.println("Something went wrong while initializing camera..");
             return false;
         }
@@ -168,7 +161,7 @@ public class Agent {
         return true;
 
     }
-    
+
     public void performArduinoRotation() throws Exception {
 
         // Write the keyword into the the serial port.
@@ -178,7 +171,6 @@ public class Agent {
         serialPort.getOutputStream().flush();
 
     }
-
 
     public boolean initializeWebSocketClient() {
         try {
@@ -202,13 +194,14 @@ public class Agent {
 
                 @Override
                 public void onMessage(String message) {
-                    
+
                     // Check that the broadcast message was "FEED".
 
                     if (message.equals(FEED_KEYWORD)) {
-                    
+
                         // Try to perform the arduino action.
                         try {
+                            System.out.println("CAT IS BEING FED NOW..");
                             performArduinoRotation();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -227,8 +220,8 @@ public class Agent {
                 }
             };
 
-        } 
-        
+        }
+
         // If anything goes wrong, print issues with server connection.
         catch (Exception e) {
             System.out.println("Had issues connecting to server..");

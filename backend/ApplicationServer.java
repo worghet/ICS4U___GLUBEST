@@ -94,10 +94,11 @@ public class ApplicationServer extends WebSocketServer {
   public void onMessage(WebSocket conn, String message) {
     if (isBase64EncodedImage(message)) {
       System.out.println("Base64 image received, broadcasting to all clients...");
-      broadcast(message); // Send the Base64 image to all connected clients
-    } else {
-      System.out.println("Invalid Base64 image data.");
-      System.out.println(message.substring(0, 20));
+      broadcast(message); 
+    }
+    else if ("FEED".equals(message)) {
+      broadcast(message);
+      System.out.println("feeding cat now..");
     }
   }
 
