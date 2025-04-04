@@ -24,8 +24,9 @@ body {
     margin: 0;
     padding: 0;
     background-color: black;
-    height: 490px;
-    width: 640px;
+    height: 70vh;
+    border-radius: 0.6vh;
+    aspect-ratio: 4/  3;
     margin-bottom: 2%;
 }
 

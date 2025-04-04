@@ -9,11 +9,12 @@
 
     <style>
         body {
-            background-image: url('../images/level-select-background.png');
-            background-size: 100% 100%;
-            filter: blur(0.8);
-            background-repeat: no-repeat;
-            background-position: center;
+            /* background-image: url('../images/level-select-background.png'); */
+            /* background-size: 100% 100%;
+            filter: blur(0.8); */
+            /* background-repeat: no-repeat; */
+            /* background-position: center; */
+            background-color: rgb(229, 224, 188);
             margin: 0;
             padding: 0;
             display: flex;
@@ -45,11 +46,31 @@
             /* outline: 5px  solid rgb(134, 140, 146); */
         }
 
+        .back-to-feed-button {
+            position: absolute;
+            top: 1vh;
+            left: 1vh;
+            /* padding: 20px; */
+            font-size: 3.7em;
+            letter-spacing: 0.02em;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            margin: 0;
+            aspect-ratio: 1/1;
+            height: 80px;
+            color: rgb(47, 47, 47);
+            background-color: aliceblue;
+            box-shadow: 0 10px 0 rgb(216, 223, 229);
+
+        }
+
     </style>
 </head>
 
 <body>
 
+    <button class="button back-to-feed-button"><</button>
 
     <div class="button-container">
         <button class="button area-button" style="background-image: url('../images/computer-level-icon.png');"></button>

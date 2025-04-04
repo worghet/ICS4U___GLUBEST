@@ -128,6 +128,8 @@ public class Agent {
         // bits, parity bits).
         serialPort.setComPortParameters(9600, 8, 1, 0);
 
+        serialPort.openPort();
+
         // Check port availibility.
         if (!serialPort.openPort()) {
             System.out.print("ERROR | ");
