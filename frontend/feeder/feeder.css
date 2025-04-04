@@ -1,9 +1,8 @@
 body {
-
+    background-color: gainsboro;
     margin: 0;
     padding: 0;
     display: flex;
-    flex-direction: column;
     width: 100vw;
     height: 100vh;
     align-items: center;
@@ -11,12 +10,90 @@ body {
     text-align: center;
 }
 
+.left-section {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.right-section {
+    height: 100%;
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.window {
+    width: 80%;
+    height: 70%;
+    background-color: rgb(196, 196, 196);
+    border-radius: 3%;
+    overflow: hidden; /* Ensures child elements respect the border-radius */
+
+}
+
+.top-bar {
+    width: 100%;
+    height:9%;
+    border-top-left-radius: 3%;
+    border-top-right-radius: 3%;
+    background-color: rgb(96, 96, 96);
+    /* padding: 0% 2%; */
+    display: flex;
+}
+
+.bottom-bar {
+    flex-grow: 1;
+    height: 91%;
+    background-color: black;
+    background-image: url('../images/koshka-test.jpg');
+    background-size: cover;
+    background-position: center;
+    border-bottom-left-radius: 3%;
+    border-bottom-right-radius: 3%;
+    color: white;
+    font-family: monospace;
+    /* font-weight: bold; */
+    font-size: 3em;
+    align-content: center;
+}
+
+.last-fed {
+    color: white;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    align-content: center;
+    font-family: monospace;
+    padding-top: 0.2%;
+    padding-left: 2.5%;
+    font-size: 1.3em;
+    text-align: start;
+}
+
+.viewer-count {
+    color: white;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    padding-right: 2.5%;
+    height: 100%;
+    align-content: center;
+    font-family: monospace;
+    padding-top: 0.2%;
+    font-size: 1.3em;
+    text-align: end;
+}
+
 .video-feed-title {
     margin: 0;
-    margin-bottom: 0.5%;
     padding: 0;
     font-family: monospace;
-    font-size: 4em;
+    font-size: 7em;
     font-weight: bold;
 }
 
@@ -57,3 +134,22 @@ body {
     transform: translateY(10px);
 }
 
+
+.back-to-feed-button {
+    position: absolute;
+    top: 1vh;
+    left: 1vh;
+    /* padding: 20px; */
+    font-size: 2.7em;
+    letter-spacing: 0.02em;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    aspect-ratio: 1/1;
+    height: 8%;
+    /* color: rgb(47, 47, 47); */
+    /* background-color: aliceblue; */
+    /* box-shadow: 0 10px 0 rgb(216, 223, 229); */
+
+}

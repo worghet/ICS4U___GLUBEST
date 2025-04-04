@@ -13,21 +13,49 @@
 
 <body>
 
+    <button class="button back-to-feed-button"><</button>
+
+    <div class="left-section">
+
+
+        <h1 class="video-feed-title">GLUBEST </h1>
+        <h1 class="video-feed-title" style="font-size: 5em; margin-bottom: 20vh;">// FEEDER</h1>
+        <!-- <h1 class="video-feed-title subtitle">
+            WATCHING: <span id="viewer-count">0</span> // LAST FED: <span id="last-fed">Unknown</span>
+        </h1> -->
+        <button class="button" onclick="sendFeedRequest()">FEED THE BEAST</button>
+
+
+
+    </div>
+
+
+    <div class="right-section">
+        
+        <div class="window">
+            <div class="top-bar">
+
+                <div class="last-fed">LAST FED // <b>UNKNOWN</b></div>
+                <div class="viewer-count">VIEWERS // <b>2</b></div>
+
+
+            </div>
+            <div class="bottom-bar">[CAM FEED HERE]</div>
+
+
+        </div>
+
+    </div>
+
     <!-- TITLE -->
 
-    <h1 class="video-feed-title">REMOTE CAT FEEDER</h1>
-    <h1 class="video-feed-title subtitle">
-        WATCHING: <span id="viewer-count">0</span> // LAST FED: <span id="last-fed">Unknown</span>
-    </h1>
     
-    <!-- VIDEO FEED BOX -->
 
-    <div id="video-feed-box"></div>
+    <!-- <div id="video-feed-box"></div>
 
     <div>
-        <button class="button" onclick="sendFeedRequest()">FEED THE BEAST</button>
         <button class="button">></button>
-    </div>
+    </div>  -->
 
     <!-- SCRIPT -->
 
