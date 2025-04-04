@@ -16,14 +16,17 @@
     <!-- TITLE -->
 
     <h1 class="video-feed-title">REMOTE CAT FEEDER</h1>
-
+    <h1 class="video-feed-title subtitle">
+        WATCHING: <span id="viewer-count">0</span> // LAST FED: <span id="last-fed">Unknown</span>
+    </h1>
+    
     <!-- VIDEO FEED BOX -->
 
     <div id="video-feed-box"></div>
 
     <div>
-        <button class="button" onclick="feed()">FEED THE BEAST</button>
-        <button class="button" onclick="feed()">PLAY FIGIMON</button>
+        <button class="button" onclick="sendFeedRequest()">FEED THE BEAST</button>
+        <button class="button">></button>
     </div>
 
     <!-- SCRIPT -->

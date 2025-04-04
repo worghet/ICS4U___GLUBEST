@@ -1,12 +1,20 @@
-package backend;
+package backend.runnables;
 
 // == IMPORTS ======================================
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import backend.user.User;
+
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import org.java_websocket.*;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -15,20 +23,21 @@ import java.util.regex.Pattern;
 // == APPLICATION SERVER ===============================
 public class ApplicationServer extends WebSocketServer {
 
+  final static Gson gson = new Gson();
+
   // == SERVER INSTANCE INFO ===========================
 
   int serverPort;
   WebSocket agentSocket;
-  Set<WebSocket> clients;
+  // Set<WebSocket> clients;
+  HashMap<WebSocket, User> activeUsers;
 
-    // == CONSOLE CONSTANTS [FOR READABILITY] ==================
+  // == CONSOLE CONSTANTS [FOR READABILITY] ==================
 
-
-    static public final int ERROR = 0;
-    static public final int OKAY = 1;
-    static public final int MESSAGE = 2;
-    static public final int INTERESTING = 3;
-
+  static public final int ERROR = 0;
+  static public final int OKAY = 1;
+  static public final int MESSAGE = 2;
+  static public final int INTERESTING = 3;
 
   // == CONSTANT ENDPOINT APIS =========================
 
@@ -77,7 +86,7 @@ public class ApplicationServer extends WebSocketServer {
   public ApplicationServer(int serverPort) {
     super(new InetSocketAddress(serverPort));
     this.serverPort = serverPort;
-    clients = new HashSet<>();
+    activeUsers = new HashMap<>();
   }
 
   // == WEBSOCKET SERVER METHODS ============================
@@ -91,10 +100,15 @@ public class ApplicationServer extends WebSocketServer {
     if (handshake.getResourceDescriptor().contains("agent")) { // Optional condition
       agentSocket = conn;
       reportToConsole("AGENT CONNECTED", INTERESTING);
-    } 
-    else {
-      clients.add(conn);
+    } else {
+
+      // prolly use login + session storage to recognize users on load
+
+      User thisUser = new User();
+
+      activeUsers.put(conn, thisUser);
       reportToConsole("NEW CLIENT CONNECTED", INTERESTING);
+      conn.send(gson.toJson(thisUser));
     }
 
   }
@@ -106,19 +120,19 @@ public class ApplicationServer extends WebSocketServer {
     // Determine color based on message status.
 
     if (ERROR == STATUS) {
-        colour = "\u001B[31m";
+      colour = "\u001B[31m";
     } else if (OKAY == STATUS) { // OKAY
-        colour = "\u001B[32m";
+      colour = "\u001B[32m";
     } else if (INTERESTING == STATUS) {
-        colour = "\u001B[34m";
+      colour = "\u001B[34m";
     } else {
-        colour = "\u001B[37m";
+      colour = "\u001B[37m";
     }
 
     // Print formatted message (reset code at the end).
 
     System.out.println(colour + message + "\u001B[0m");
-}
+  }
 
   // What to do on disconnection.
 
@@ -128,9 +142,12 @@ public class ApplicationServer extends WebSocketServer {
     if (conn.equals(agentSocket)) {
       agentSocket = null;
       reportToConsole("AGENT DISCONNECTED", ERROR);
-    } 
-    else {
-      clients.remove(conn);
+    } else {
+      if (User.CAT_WATCHING.equals(activeUsers.get(conn).getCurrentlyDoing())) {
+        agentSocket.send("REMOVE_WATCHER");
+        System.out.println("removing watcher");
+      }
+      activeUsers.remove(conn);
       reportToConsole("A CLIENT DISCONNECTED", ERROR);
 
     }
@@ -142,29 +159,39 @@ public class ApplicationServer extends WebSocketServer {
   @Override
   public void onMessage(WebSocket conn, String message) {
 
-    if (isBase64EncodedImage(message)) {
-      // System.out.println("Base64 image received, broadcasting to all clients...");
-      broadcast(message);
+    JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
+    String messageType = jsonObject.get("type").getAsString();
 
-    } else if ("FEED".equals(message)) {
-      System.out.print("ACTION | ");
-      reportToConsole("FEEDING BEASTS", INTERESTING);
-      agentSocket.send(message);
+    switch (messageType) {
+      case "FEEDER_DATA":
+        // broadcast only to WATCHERS
+        for (WebSocket userSocket : activeUsers.keySet()) {
+          User user = activeUsers.get(userSocket);
+          if (User.CAT_WATCHING.equals(user.getCurrentlyDoing())) {  // Send to Watchers only
+              userSocket.send(message);  // Send the feed data
+          }
+      }
+        
+
+        break;
+
+      case "FEED_REQUEST":
+        System.out.print("ACTION | ");
+        reportToConsole("FEEDING BEASTS", INTERESTING);
+        agentSocket.send("FEED");
+        break;
+
+      case "ROLE_ASSIGNMENT":
+
+        activeUsers.get(conn).setCurrentlyDoingTo(jsonObject.get("role").getAsString());
+        agentSocket.send("ADD_WATCHER");
+        System.out.println("adding watcher");
+        break;
+
+      default:
+        break;
     }
 
-  }
-
-  private boolean isBase64EncodedImage(String message) {
-
-    if (message.startsWith("data:image/")) {
-      message = message.split(",")[1]; // Get the Base64 part after the comma
-    }
-
-    // Regex pattern to match valid Base64-encoded data
-    String base64Pattern = "^[A-Za-z0-9+/=]+$";
-
-    // Return true if the message matches the Base64 image pattern
-    return Pattern.matches(base64Pattern, message);
   }
 
   @Override
