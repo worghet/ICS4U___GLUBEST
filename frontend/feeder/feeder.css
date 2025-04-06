@@ -11,7 +11,7 @@ body {
 }
 
 .left-section {
-    width: 40%;
+    width: 43%;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -21,7 +21,7 @@ body {
 
 .right-section {
     height: 100%;
-    width: 60%;
+    width: 57%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -98,8 +98,8 @@ body {
 }
 
 .subtitle {
-    font-size: 1.5em;
-    margin-bottom: 1%;
+    font-size: 5.4em;
+    margin-bottom: 10%;
 }
 
 #video-feed-box {
@@ -115,7 +115,7 @@ body {
 .button {
     font-size: 3.5em;
     border: none;
-    padding: 10px 25px;
+    padding: 30px 25px;
     border-radius: 5px;
     color: whitesmoke;
     font-weight: bold;
@@ -139,7 +139,6 @@ body {
     position: absolute;
     top: 1vh;
     left: 1vh;
-    /* padding: 20px; */
     font-size: 2.7em;
     letter-spacing: 0.02em;
     text-align: center;
