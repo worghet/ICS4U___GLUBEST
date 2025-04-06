@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="feeder.css">
+    <link rel="stylesheet" href="/feeder/feeder.css">
     <title>Glubest — Feeder</title>
 </head>
 
@@ -13,7 +13,7 @@
 
 <body>
 
-    <button class="button back-to-feed-button"><</button>
+    <button class="button back-to-feed-button" onclick="backToMainMenu()"><</button>
 
     <div class="left-section">
 
@@ -35,12 +35,12 @@
         <div class="window">
             <div class="top-bar">
 
-                <div class="last-fed">LAST FED // <b>UNKNOWN</b></div>
-                <div class="viewer-count">VIEWERS // <b>2</b></div>
+                <div class="last-fed">LAST FED // <b id="last-fed">UNKNOWN</b></div>
+                <div class="viewer-count">VIEWERS // <b id="viewer-count">2</b></div>
 
 
             </div>
-            <div class="bottom-bar">[CAM FEED HERE]</div>
+            <div class="bottom-bar" id="video-feed-box">[CAM FEED HERE]</div>
 
 
         </div>
@@ -59,7 +59,7 @@
 
     <!-- SCRIPT -->
 
-    <script src="feeder.js"></script>
+    <script src="/feeder/feeder.js"></script>
 
 </body>
 

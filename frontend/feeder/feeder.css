@@ -14,6 +14,7 @@ body {
     width: 43%;
     height: 100%;
     display: flex;
+
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -102,7 +103,7 @@ body {
     margin-bottom: 10%;
 }
 
-#video-feed-box {
+/* #video-feed-box {
     margin: 0;
     padding: 0;
     background-color: black;
@@ -110,7 +111,7 @@ body {
     border-radius: 0.6vh;
     aspect-ratio: 4/  3;
     margin-bottom: 2%;
-}
+} */
 
 .button {
     font-size: 3.5em;

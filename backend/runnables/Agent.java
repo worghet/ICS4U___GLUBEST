@@ -20,8 +20,9 @@ public class Agent {
 
     // == CLASS CONSTANTS ========================================
 
+    private static final String AGENT = "   AGENT  ";
     private static final String SERIAL_PORT_NAME = "/dev/ttyACM0"; // linux-specific.
-    private static final String FEED_KEYWORD = "FEED";
+    public static final String FEED_KEYWORD = "FEED";
     private static final int WEBCAM_SENDING_FPS = 30;
 
     // == FUNCTIONAL CONSTANTS ===================================
@@ -41,12 +42,20 @@ public class Agent {
     // This main will be run on the agent computer.
     public static void main(String[] args) {
 
+        
         // Setup agent object
+        System.out.println("|========================================================|");
+        System.out.println("|===== #AGENT =====|=============== SETUP ===============|");
+        
         Agent agent = createAgent();
 
-        // Start processes.
+
+
         if (agent != null) {
             agent.startOperating();
+            System.out.println("|===== #AGENT =====|================ LOG ================|");
+        } else {
+            ServerManager.consolePrint(AGENT, "AGENT IS NULL", ServerManager.RED);
         }
 
     }
@@ -74,9 +83,7 @@ public class Agent {
 
             agent.feederData = new FeederData();
 
-            System.out.print("AGENT INIT | ");
-            ApplicationServer.reportToConsole("SUCCESS", ApplicationServer.OKAY);
-
+            
             // Setup the thread for sending webcam data.
             agent.webcamSendingThread = new Thread() {
                 public void run() {
@@ -105,19 +112,21 @@ public class Agent {
                             Thread.sleep(1000 / WEBCAM_SENDING_FPS);
                         }
                     } catch (Exception exception) {
-                        System.out.print("ERROR | ");
-                        ApplicationServer.reportToConsole("COULDN'T SEND WEBCAM", ApplicationServer.ERROR);
+                        ServerManager.consolePrint(AGENT, "CAMERA SENDING FAILED", ServerManager.RED);
                     }
                 }
             };
 
+            ServerManager.consolePrint(AGENT, "CONSTRUCTION OK", ServerManager.GREEN);
+
             // If all initiallization was good, return the agent as a new object.
             return agent;
 
-        } else {
+        } 
+        else {
 
             // Otherwise, print error message.
-            System.err.println("Something went wrong within the initialization process.");
+            ServerManager.consolePrint(AGENT, "CONSTRUCTION FAILED", ServerManager.RED);
 
         }
 
@@ -129,23 +138,22 @@ public class Agent {
 
     private boolean initializedSerialPort() {
 
-        // serialPort = SerialPort.getCommPort(SERIAL_PORT_NAME);
+        try {
 
-        // // Setup serial port (parameters: int baud rate, data size in bits, num stop
-        // // bits, parity bits).
-        // serialPort.setComPortParameters(9600, 8, 1, 0);
+            serialPort = SerialPort.getCommPort(SERIAL_PORT_NAME);
 
-        // serialPort.openPort();
+            // Setup serial port (parameters: int baud rate, data size in bits, num stop
+            // bits, parity bits).
+            serialPort.setComPortParameters(9600, 8, 1, 0);
+            serialPort.openPort();
 
-        // // Check port availibility.
-        // if (!serialPort.openPort()) {
-        // System.out.print("ERROR | ");
-        // ApplicationServer.reportToConsole("ARDUINO PORT UNAVAILIBLE",
-        // ApplicationServer.ERROR);
+        } 
+        catch (Exception exception) {
+            ServerManager.consolePrint(AGENT, "SERIAL PORT FAILED", ServerManager.RED);    
+            // return false;
+        }
 
-        // return false;
-        // }
-
+        ServerManager.consolePrint(AGENT, "SERIAL PORT OK", ServerManager.GREEN);    
         return true;
     }
 
@@ -163,16 +171,12 @@ public class Agent {
             webcam.open();
 
         } catch (Exception exception) {
-
-            // Print a message, and return false to prevent condition in factory from being
-            // true.
-            System.out.print("ERROR | ");
-            ApplicationServer.reportToConsole("COULDN'T INITIALIZE WEBCAM", ApplicationServer.ERROR);
-
+            ServerManager.consolePrint(AGENT, "WEBCAM FAILED", ServerManager.RED);    
             return false;
         }
 
         // Return true to indicate that the initialization was successful.
+        ServerManager.consolePrint(AGENT, "WEBCAM OK", ServerManager.GREEN);    
         return true;
 
     }
@@ -192,7 +196,7 @@ public class Agent {
 
             // Recognize the server location (via URI) + Identify that this is the agent
             // (more efficient).
-            URI serverUri = URI.create("ws://127.0.0.1:8000/agent");
+            URI serverUri = URI.create("ws://127.0.0.1:8001/agent");
 
             // Initialize the websocket client.
             webSocketClient = new WebSocketClient(serverUri) {
@@ -201,8 +205,7 @@ public class Agent {
 
                 @Override
                 public void onOpen(ServerHandshake handshake) {
-                    ApplicationServer.reportToConsole("", WEBCAM_SENDING_FPS);
-
+                    ServerManager.consolePrint(AGENT, "WEBSOCKET CONNECTION OK", ServerManager.GREEN);
                 }
 
                 // Method for what to do when recieve message.
@@ -229,14 +232,12 @@ public class Agent {
 
                         // Try to perform the arduino action.
                         try {
-                            System.out.print("ACTION | ");
-                            ApplicationServer.reportToConsole("FEEDING CAT", ApplicationServer.INTERESTING);
+                            
+                            
+                            feederData.formattedLastTimeFed = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
+                            
+                                    ServerManager.consolePrint(AGENT, "FEEDING COMPLETE @ " + feederData.formattedLastTimeFed, ServerManager.BLUE);
 
-                            // performArduinoRotation();
-
-                            feederData.formattedLastTimeFed = LocalDateTime.now()
-                                    .format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
-                            System.out.println("Fed at: " + feederData.formattedLastTimeFed);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -257,7 +258,7 @@ public class Agent {
 
         // If anything goes wrong, print issues with server connection.
         catch (Exception e) {
-            System.out.println("Had issues connecting to server..");
+            ServerManager.consolePrint(AGENT, "FAILED TO CONNECT TO SERVER", ServerManager.RED);
             return false;
         }
 

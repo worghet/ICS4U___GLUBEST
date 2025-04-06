@@ -96,20 +96,6 @@ public class ApplicationServer extends WebSocketServer {
   @Override
   public void onOpen(WebSocket conn, ClientHandshake handshake) {
 
-    // Identify agent based on first message (or other logic)
-    if (handshake.getResourceDescriptor().contains("agent")) { // Optional condition
-      agentSocket = conn;
-      reportToConsole("AGENT CONNECTED", INTERESTING);
-    } else {
-
-      // prolly use login + session storage to recognize users on load
-
-      User thisUser = new User();
-
-      activeUsers.put(conn, thisUser);
-      reportToConsole("NEW CLIENT CONNECTED", INTERESTING);
-      conn.send(gson.toJson(thisUser));
-    }
 
   }
 

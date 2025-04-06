@@ -1,6 +1,6 @@
 
 // CONSTANTS
-const FEEDER_API = "127.0.0.1:8000";
+const FEEDER_API = "127.0.0.1:8001";
 const VIDEO_FEED_BOX = document.getElementById("video-feed-box");
 const VIEWER_COUNT_ELEMENT = document.getElementById("viewer-count")
 const LAST_FED_ELEMENT = document.getElementById("last-fed")
@@ -24,6 +24,11 @@ window.onload = function () {
 
 };
 
+window.onclose = function() {
+
+    socket.close();
+
+}
 
 // == OTHER FUNCTIONS ========================================
 
@@ -55,9 +60,6 @@ function setupWebsocketClient() {
                 let lastFedTime = data.formattedLastTimeFed; 
         
                 VIDEO_FEED_BOX.style.backgroundImage = "url('data:image/png;base64," + imageBase64 + "')";
-                VIDEO_FEED_BOX.style.backgroundSize = "cover";
-                VIDEO_FEED_BOX.style.backgroundPosition = "center";
-            
                 LAST_FED_ELEMENT.innerText = lastFedTime;
                 VIEWER_COUNT_ELEMENT.innerText = viewerCount;    
                 break;
@@ -80,7 +82,15 @@ function setupWebsocketClient() {
 }
 
 function sendFeedRequest() {
-    const message = JSON.stringify({ type: "FEED_REQUEST" });
-    socket.send(message);
+
+    fetch("/feed-request", {method: "POST"});
+    console.log("sent request")
+
+    // const message = JSON.stringify({ type: "FEED_REQUEST" });
+    // socket.send(message);
+}
+
+function backToMainMenu() {
+    window.location.href = "/glubest";
 }
 
