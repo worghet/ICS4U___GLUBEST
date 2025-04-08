@@ -23,7 +23,7 @@ public class Agent {
     private static final String AGENT = "   AGENT  ";
     private static final String SERIAL_PORT_NAME = "/dev/ttyACM0"; // linux-specific.
     public static final String FEED_KEYWORD = "FEED";
-    private static final int WEBCAM_SENDING_FPS = 30;
+    private static final int WEBCAM_SENDING_FPS = 5;
 
     // == FUNCTIONAL CONSTANTS ===================================
 
@@ -196,7 +196,9 @@ public class Agent {
 
             // Recognize the server location (via URI) + Identify that this is the agent
             // (more efficient).
-            URI serverUri = URI.create("ws://18.218.44.44:8090/agent");
+            String global = "ws://18.218.44.44:8090/agent";
+            String local = "ws://10.0.0.198:8090/agent";
+            URI serverUri = URI.create(local); // "ws://18.218.44.44:8090/agent"
 
             // Initialize the websocket client.
             webSocketClient = new WebSocketClient(serverUri) {

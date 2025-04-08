@@ -158,6 +158,8 @@ public class ServerManager {
                 case "/feeder":
                     // System.out.println("feeder requested");
                     requestedPath = "/feeder/feeder.html";
+                case "/area-select":
+                    requestedPath = "/game/area-select.html";   
                 default:
                     requestedPath = "/frontend" + requestedPath;
             }
@@ -251,7 +253,7 @@ public class ServerManager {
                         switch (messageType) {
                             case "FEEDER_DATA":
                                 broadcast(message);
-                              // broadcast only to WATCHERS
+                              // broadcast only to WATCHERS (memory :::)
                             //   for (WebSocket userSocket : activeUsers.keySet()) {
                             //     User user = activeUsers.get(userSocket);
                             //     if (User.CAT_WATCHING.equals(user.getCurrentlyDoing())) {  // Send to Watchers only

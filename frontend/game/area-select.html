@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="game.css">
+    <link rel="stylesheet" href="/game.css">
     <title>Glubest — Area Select</title>
 
     <style>
@@ -36,8 +36,8 @@
         }
 
         .area-button {
-            background-color: aliceblue;
-            box-shadow: 0 10px 0 rgb(216, 223, 229);
+            background-color: rgb(157, 162, 167);
+            box-shadow: 0 10px 0 rgb(133, 137, 141);
             aspect-ratio: 1;
             opacity: 0.99;
             height: 25vh;
@@ -70,12 +70,24 @@
 </head>
 
 <body>
-     <button class="button back-to-feed-button"><</button>
+     <button class="button back-to-feed-button" onclick="backToMainMenu()"><</button>
 
     <div class="button-container">
         <button class="button area-button" style="background-image: url('../images/computer-level-icon.png');"></button>
         <button class="button area-button"></button>
     </div>
+
+
+
+    <script>
+
+        function backToMainMenu() {
+            window.location.href = "/glubest";
+        }
+
+
+
+    </script>
 
 </body>
 
