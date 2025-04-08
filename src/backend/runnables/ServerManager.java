@@ -34,6 +34,9 @@ public class ServerManager {
     private static HttpServer httpServer;
     private static WebSocketServer webSocketServer;
 
+    private static int HTTPSERVER_PORT = 8000;
+    private static int WEBSOCKET_PORT = 8090;
+
     // Logging codes.
 
     public static final String HTTPSERVER = "HTTPSERVER";
@@ -98,13 +101,11 @@ public class ServerManager {
 
     private static void initializeHttpServer() {
 
-        int httpServerPort = 8000;
-
-        if (isPortAvailable(httpServerPort)) {
+        if (isPortAvailable(HTTPSERVER_PORT)) {
 
             try {
 
-                httpServer = HttpServer.create(new InetSocketAddress(httpServerPort), 0);
+                httpServer = HttpServer.create(new InetSocketAddress(HTTPSERVER_PORT), 0);
 
                 // add apis:
 
@@ -198,13 +199,12 @@ public class ServerManager {
 
     private static void initializeWebSocketServer() {
 
-        int webSocketPort = 8001;
 
-        if (isPortAvailable(webSocketPort)) {
+        if (isPortAvailable(WEBSOCKET_PORT)) {
 
             try {
 
-                webSocketServer = new WebSocketServer(new InetSocketAddress(webSocketPort)) {
+                webSocketServer = new WebSocketServer(new InetSocketAddress(WEBSOCKET_PORT)) {
 
                     @Override
                     public void onOpen(WebSocket conn, ClientHandshake handshake) {

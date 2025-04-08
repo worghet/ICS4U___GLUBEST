@@ -196,7 +196,7 @@ public class Agent {
 
             // Recognize the server location (via URI) + Identify that this is the agent
             // (more efficient).
-            URI serverUri = URI.create("ws://127.0.0.1:8001/agent");
+            URI serverUri = URI.create("ws://18.218.44.44:8090/agent");
 
             // Initialize the websocket client.
             webSocketClient = new WebSocketClient(serverUri) {
