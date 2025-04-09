@@ -181,14 +181,23 @@ public class Agent {
 
     }
 
-    public void performArduinoRotation() throws Exception {
+    public void performArduinoRotation()  {
 
-        // Write the keyword into the the serial port.
-        serialPort.getOutputStream().write(FEED_KEYWORD.getBytes());
 
-        // Force the output to be written.
-        serialPort.getOutputStream().flush();
+        try {
 
+            
+            // Write the keyword into the the serial port.
+            serialPort.getOutputStream().write(FEED_KEYWORD.getBytes());
+
+            // Force the output to be written.
+            serialPort.getOutputStream().flush();
+
+            System.out.println("rotated");
+        }
+         catch (Exception exception) {
+            System.out.println("sum send went wrong");
+         }
     }
 
     public boolean initializeWebSocketClient() {
@@ -198,7 +207,7 @@ public class Agent {
             // (more efficient).
             String global = "ws://18.218.44.44:8090/agent";
             String local = "ws://10.0.0.198:8090/agent";
-            URI serverUri = URI.create(local); // "ws://18.218.44.44:8090/agent"
+            URI serverUri = URI.create(global); // "ws://18.218.44.44:8090/agent"
 
             // Initialize the websocket client.
             webSocketClient = new WebSocketClient(serverUri) {
@@ -220,6 +229,7 @@ public class Agent {
                     switch (message) {
 
                         case FEED_KEYWORD:
+                            performArduinoRotation();
                             break;
                         case "ADD_WATCHER":
                             feederData.viewerCount++;

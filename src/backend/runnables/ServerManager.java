@@ -158,8 +158,10 @@ public class ServerManager {
                 case "/feeder":
                     // System.out.println("feeder requested");
                     requestedPath = "/feeder/feeder.html";
+                    break;
                 case "/area-select":
                     requestedPath = "/game/area-select.html";   
+                    break;
                 default:
                     requestedPath = "/frontend" + requestedPath;
             }
