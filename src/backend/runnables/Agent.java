@@ -146,14 +146,14 @@ public class Agent {
             // bits, parity bits).
             serialPort.setComPortParameters(9600, 8, 1, 0);
             serialPort.openPort();
+            ServerManager.consolePrint(AGENT, "SERIAL PORT OK", ServerManager.GREEN);    
 
         } 
         catch (Exception exception) {
             ServerManager.consolePrint(AGENT, "SERIAL PORT FAILED", ServerManager.RED);    
-            // return false;
+            return false;
         }
 
-        ServerManager.consolePrint(AGENT, "SERIAL PORT OK", ServerManager.GREEN);    
         return true;
     }
 
@@ -193,7 +193,7 @@ public class Agent {
             // Force the output to be written.
             serialPort.getOutputStream().flush();
 
-            System.out.println("rotated");
+            // System.out.println("rotated");
         }
          catch (Exception exception) {
             System.out.println("sum send went wrong");
@@ -230,6 +230,10 @@ public class Agent {
 
                         case FEED_KEYWORD:
                             performArduinoRotation();
+                            feederData.formattedLastTimeFed = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
+                            
+                            ServerManager.consolePrint(AGENT, "FEEDING COMPLETE @ " + feederData.formattedLastTimeFed, ServerManager.BLUE);
+
                             break;
                         case "ADD_WATCHER":
                             feederData.viewerCount++;
@@ -239,22 +243,6 @@ public class Agent {
                             feederData.viewerCount--;
                             break;
                     }
-
-                    if (message.equals(FEED_KEYWORD)) {
-
-                        // Try to perform the arduino action.
-                        try {
-                            
-                            
-                            feederData.formattedLastTimeFed = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
-                            
-                                    ServerManager.consolePrint(AGENT, "FEEDING COMPLETE @ " + feederData.formattedLastTimeFed, ServerManager.BLUE);
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
                 }
 
                 @Override
@@ -292,7 +280,7 @@ public class Agent {
         }
 
         public String toJsonString() {
-            return ApplicationServer.gson.toJson(this);
+            return ServerManager.gson.toJson(this);
         }
 
     }

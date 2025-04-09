@@ -28,7 +28,6 @@ public class ServerManager {
     private static HashMap<WebSocket, User> activeUsers;
     private static WebSocket agentSocket;
 
-
     // Actual Servers.
 
     private static HttpServer httpServer;
@@ -65,7 +64,8 @@ public class ServerManager {
 
     public static void consolePrint(String LOGGED_SERVER_CONSTANT, String message, String COLOUR_CONSTANT) {
 
-        System.out.println("|    " + WHITE + LOGGED_SERVER_CONSTANT + "   " + COLOUR_RESET_CONSTANT + " | " + COLOUR_CONSTANT + message + COLOUR_RESET_CONSTANT);
+        System.out.println("|    " + WHITE + LOGGED_SERVER_CONSTANT + "   " + COLOUR_RESET_CONSTANT + " | "
+                + COLOUR_CONSTANT + message + COLOUR_RESET_CONSTANT);
 
     }
 
@@ -116,9 +116,7 @@ public class ServerManager {
                     public void handle(HttpExchange exchange) throws IOException {
                         String response = "Feed endpoint reached!";
 
-
                         agentSocket.send(Agent.FEED_KEYWORD);
-
 
                         exchange.sendResponseHeaders(200, response.getBytes().length);
                         try (OutputStream os = exchange.getResponseBody()) {
@@ -147,36 +145,37 @@ public class ServerManager {
         public void handle(HttpExchange exchange) throws IOException {
 
             // GET REQUESTED PATH
-
             String requestedPath = exchange.getRequestURI().getPath();
 
             switch (requestedPath) {
                 case "/":
                 case "/glubest":
-                    requestedPath = "/frontend/index.html";
+                    requestedPath = "index.html";
                     break;
                 case "/feeder":
-                    requestedPath = "/frontend/feeder/feeder.html";
+                    requestedPath = "feeder/feeder.html";
                     break;
-                case "/area-select":
-                    requestedPath = "frontend/game/area-select.html";   
+                case "/chatroom":
+                    requestedPath = "chatroom/chatroom.html";
                     break;
                 default:
-                    requestedPath = "/frontend" + requestedPath;
+                    // Leave as is; assume it's a direct file reference
+                    break;
             }
 
             String projectRoot = System.getProperty("user.dir");
-            System.out.println("user requested: " + projectRoot + requestedPath);
+            System.out.println("user requested: " + projectRoot + "/frontend/" + requestedPath);
 
-            File file = new File(projectRoot, requestedPath);
-
-            // check if file exists (technically should)
+            File file = new File(projectRoot, "/frontend/" + requestedPath);
 
             if (file.exists() && !file.isDirectory()) {
 
+                // Determine content type
+                String contentType = guessContentType(file.getName());
+                exchange.getResponseHeaders().add("Content-Type", contentType);
+
                 exchange.sendResponseHeaders(200, file.length());
 
-                // Write the file content to the response body
                 try (OutputStream os = exchange.getResponseBody()) {
                     Files.copy(file.toPath(), os);
                 }
@@ -190,18 +189,28 @@ public class ServerManager {
             }
         }
 
+        // Utility method for content-type guessing
+        private String guessContentType(String fileName) {
+            if (fileName.endsWith(".html"))
+                return "text/html";
+            if (fileName.endsWith(".css"))
+                return "text/css";
+            if (fileName.endsWith(".js"))
+                return "application/javascript";
+            if (fileName.endsWith(".json"))
+                return "application/json";
+            if (fileName.endsWith(".png"))
+                return "image/png";
+            if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
+                return "image/jpeg";
+            if (fileName.endsWith(".gif"))
+                return "image/gif";
+            return "application/octet-stream";
+        }
+
     }
 
-
-
-
-
-
-
-
-
     private static void initializeWebSocketServer() {
-
 
         if (isPortAvailable(WEBSOCKET_PORT)) {
 
@@ -230,46 +239,47 @@ public class ServerManager {
 
                     @Override
                     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-                    
+
                         // System.out.println("onclose called");
 
                         if (agentSocket.equals(conn)) {
                             agentSocket = null;
                             consolePrint(WEBSOCKET, "AGENT DISCONNECTED", YELLOW);
-                        }
-                        else {
+                        } else {
                             activeUsers.remove(conn);
                             consolePrint(WEBSOCKET, "CLIENT DISCONNECTED", CYAN);
                         }
-                    
+
                     }
 
                     @Override
                     public void onMessage(WebSocket conn, String message) {
-                    
+
                         JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
                         String messageType = jsonObject.get("type").getAsString();
-
 
                         switch (messageType) {
                             case "FEEDER_DATA":
                                 broadcast(message);
-                              // broadcast only to WATCHERS (memory :::)
-                            //   for (WebSocket userSocket : activeUsers.keySet()) {
-                            //     User user = activeUsers.get(userSocket);
-                            //     if (User.CAT_WATCHING.equals(user.getCurrentlyDoing())) {  // Send to Watchers only
-                            //         userSocket.send(message);  // Send the feed data
-                            //     }
-                            // }
+                                // broadcast only to WATCHERS (memory :::)
+                                // for (WebSocket userSocket : activeUsers.keySet()) {
+                                // User user = activeUsers.get(userSocket);
+                                // if (User.CAT_WATCHING.equals(user.getCurrentlyDoing())) { // Send to Watchers
+                                // only
+                                // userSocket.send(message); // Send the feed data
+                                // }
+                                // }
                         }
-                    
+
                     }
 
                     @Override
-                    public void onError(WebSocket conn, Exception ex) {}
+                    public void onError(WebSocket conn, Exception ex) {
+                    }
 
                     @Override
-                    public void onStart() {}
+                    public void onStart() {
+                    }
 
                 };
 

@@ -117,7 +117,7 @@
 
     <div class="email-form">
         <input type="email" class="email-input" placeholder="Enter your username..." />
-        <button class="email-button" onclick="goToAreaSelect()">ENTER</button>
+        <button class="email-button" onclick="goToChatroom()">JOIN (<b>0</b>)</button>
     </div>
 
 
@@ -133,14 +133,9 @@
             window.location.href = "/feeder";
         }
 
-        function goToAreaSelect() {
-
-            // if (sessionStorage) has a user initialized (via ID), rename them to given, otherwise, make a new user and assign that name
-
-            window.location.href = "/area-select"
-
+        function goToChatroom() {
+            window.location.href = "/chatroom";
         }
-
 
     </script>
 
