@@ -1,6 +1,7 @@
 
 // CONSTANTS
-const FEEDER_API = "10.0.0.198:8090"; //18.218.44.44:8090
+// 10.0.0.198:8090
+const FEEDER_API = "18.218.44.44:8090"; //18.218.44.44:8090
 const VIDEO_FEED_BOX = document.getElementById("video-feed-box");
 const VIEWER_COUNT_ELEMENT = document.getElementById("viewer-count")
 const LAST_FED_ELEMENT = document.getElementById("last-fed")

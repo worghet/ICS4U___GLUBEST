@@ -156,18 +156,17 @@ public class ServerManager {
                     requestedPath = "/frontend/index.html";
                     break;
                 case "/feeder":
-                    // System.out.println("feeder requested");
-                    requestedPath = "/feeder/feeder.html";
+                    requestedPath = "/frontend/feeder/feeder.html";
                     break;
                 case "/area-select":
-                    requestedPath = "/game/area-select.html";   
+                    requestedPath = "frontend/game/area-select.html";   
                     break;
                 default:
                     requestedPath = "/frontend" + requestedPath;
             }
 
             String projectRoot = System.getProperty("user.dir");
-            // System.out.println("user requested: " + projectRoot + requestedPath);
+            System.out.println("user requested: " + projectRoot + requestedPath);
 
             File file = new File(projectRoot, requestedPath);
 
