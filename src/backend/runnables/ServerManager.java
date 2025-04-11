@@ -229,10 +229,8 @@ public class ServerManager {
 
                             // prolly use login + session storage to recognize users on load
 
-                            User thisUser = new User();
                             consolePrint(WEBSOCKET, "CLIENT CONNECTED", CYAN);
-                            activeUsers.put(conn, thisUser);
-                            conn.send(gson.toJson(thisUser));
+                            agentSocket.send("ADD_WATCHER");
                         }
 
                     }
@@ -246,8 +244,8 @@ public class ServerManager {
                             agentSocket = null;
                             consolePrint(WEBSOCKET, "AGENT DISCONNECTED", YELLOW);
                         } else {
-                            activeUsers.remove(conn);
                             consolePrint(WEBSOCKET, "CLIENT DISCONNECTED", CYAN);
+                            agentSocket.send("REMOVE_WATCHER");
                         }
 
                     }
