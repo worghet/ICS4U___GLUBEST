@@ -42,14 +42,11 @@ public class Agent {
     // This main will be run on the agent computer.
     public static void main(String[] args) {
 
-        
         // Setup agent object
         System.out.println("|========================================================|");
         System.out.println("|===== #AGENT =====|=============== SETUP ===============|");
-        
+
         Agent agent = createAgent();
-
-
 
         if (agent != null) {
             agent.startOperating();
@@ -65,8 +62,37 @@ public class Agent {
         // Connect to the server.
         webSocketClient.connect();
 
+        new Thread(() -> {
+
+            int reconnectAttempts = 0;
+
+
+            while (true) {
+
+                if (!webSocketClient.isOpen()) {
+                    reconnectAttempts++;
+                    ServerManager.consolePrint(AGENT, "ATTEMPTING RECONNECTION (" + reconnectAttempts + ")", ServerManager.RED);
+                    initializeWebSocketClient();
+                    webSocketClient.connect();
+                } 
+                else {
+                    reconnectAttempts = 0;
+                }
+
+                try {
+                    Thread.sleep(5000); // 30 seconds
+                } 
+                catch (Exception e) {}
+            }
+        }).start();
+
         // Start sending the webcam data.
-        webcamSendingThread.start();
+        if (webSocketClient.isOpen()) {
+
+            webcamSendingThread.start();
+        } else {
+            ServerManager.consolePrint(AGENT, "COULDN'T CONNECT", ServerManager.RED);
+        }
 
     }
 
@@ -83,7 +109,6 @@ public class Agent {
 
             agent.feederData = new FeederData();
 
-            
             // Setup the thread for sending webcam data.
             agent.webcamSendingThread = new Thread() {
                 public void run() {
@@ -122,8 +147,7 @@ public class Agent {
             // If all initiallization was good, return the agent as a new object.
             return agent;
 
-        } 
-        else {
+        } else {
 
             // Otherwise, print error message.
             ServerManager.consolePrint(AGENT, "CONSTRUCTION FAILED", ServerManager.RED);
@@ -146,11 +170,10 @@ public class Agent {
             // bits, parity bits).
             serialPort.setComPortParameters(9600, 8, 1, 0);
             serialPort.openPort();
-            ServerManager.consolePrint(AGENT, "SERIAL PORT OK", ServerManager.GREEN);    
+            ServerManager.consolePrint(AGENT, "SERIAL PORT OK", ServerManager.GREEN);
 
-        } 
-        catch (Exception exception) {
-            ServerManager.consolePrint(AGENT, "SERIAL PORT FAILED", ServerManager.RED);    
+        } catch (Exception exception) {
+            ServerManager.consolePrint(AGENT, "SERIAL PORT FAILED", ServerManager.RED);
             return false;
         }
 
@@ -171,22 +194,20 @@ public class Agent {
             webcam.open();
 
         } catch (Exception exception) {
-            ServerManager.consolePrint(AGENT, "WEBCAM FAILED", ServerManager.RED);    
+            ServerManager.consolePrint(AGENT, "WEBCAM FAILED", ServerManager.RED);
             return false;
         }
 
         // Return true to indicate that the initialization was successful.
-        ServerManager.consolePrint(AGENT, "WEBCAM OK", ServerManager.GREEN);    
+        ServerManager.consolePrint(AGENT, "WEBCAM OK", ServerManager.GREEN);
         return true;
 
     }
 
-    public void performArduinoRotation()  {
-
+    public void performArduinoRotation() {
 
         try {
 
-            
             // Write the keyword into the the serial port.
             serialPort.getOutputStream().write(FEED_KEYWORD.getBytes());
 
@@ -194,10 +215,9 @@ public class Agent {
             serialPort.getOutputStream().flush();
 
             // System.out.println("rotated");
-        }
-         catch (Exception exception) {
+        } catch (Exception exception) {
             System.out.println("sum send went wrong");
-         }
+        }
     }
 
     public boolean initializeWebSocketClient() {
@@ -230,9 +250,11 @@ public class Agent {
 
                         case FEED_KEYWORD:
                             performArduinoRotation();
-                            feederData.formattedLastTimeFed = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
-                            
-                            ServerManager.consolePrint(AGENT, "FEEDING COMPLETE @ " + feederData.formattedLastTimeFed, ServerManager.BLUE);
+                            feederData.formattedLastTimeFed = LocalDateTime.now()
+                                    .format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
+
+                            ServerManager.consolePrint(AGENT, "FEEDING COMPLETE @ " + feederData.formattedLastTimeFed,
+                                    ServerManager.BLUE);
 
                             break;
                         case "ADD_WATCHER":

@@ -51,9 +51,6 @@ body {
     flex-grow: 1;
     height: 91%;
     background-color: black;
-    background-image: url('../images/koshka-test.jpg');
-    background-size: cover;
-    background-position: center;
     border-bottom-left-radius: 3%;
     border-bottom-right-radius: 3%;
     color: white;
