@@ -16,8 +16,8 @@ window.onload = function () {
     try {
         setupWebsocketClient();
         console.log("Successfully connected to:", FEEDER_API);
-    
-    
+
+
     }
     catch (exception) {
         console.log("Couldn't connect to server")
@@ -25,7 +25,7 @@ window.onload = function () {
 
 };
 
-window.onclose = function() {
+window.onclose = function () {
 
     socket.close();
 
@@ -51,40 +51,27 @@ function setupWebsocketClient() {
     socket.onmessage = function (event) {
 
         let data = JSON.parse(event.data);
+        let imageBase64 = data.encodedImage;
+        let viewerCount = data.viewerCount;
+        let lastFedTime = data.formattedLastTimeFed;
 
-        switch (data.type) {
+        VIDEO_FEED_BOX.innerHTML = "";
+        VIDEO_FEED_BOX.style.backgroundImage = "url('data:image/png;base64," + imageBase64 + "')";
+        LAST_FED_ELEMENT.innerText = lastFedTime;
+        VIEWER_COUNT_ELEMENT.innerText = viewerCount;
 
-
-            case "FEEDER_DATA":
-                let imageBase64 = data.encodedImage; 
-                let viewerCount = data.viewerCount; 
-                let lastFedTime = data.formattedLastTimeFed; 
-        
-                VIDEO_FEED_BOX.style.backgroundImage = "url('data:image/png;base64," + imageBase64 + "')";
-                LAST_FED_ELEMENT.innerText = lastFedTime;
-                VIEWER_COUNT_ELEMENT.innerText = viewerCount;    
-                break;
-            case "USER_INIT":
-                USER_ID = data.userId;
-                console.log("u r new user w/ id: " + USER_ID)
-                break;
-            default:
-                console.log("RECIEVED INVALID JSON TYPE")        
-
-        }
-
-    };
+};
 
 
 
-    socket.onclose = function (event) {};
-    socket.onerror = function (event) {};
+socket.onclose = function (event) { };
+socket.onerror = function (event) { };
 
 }
 
 function sendFeedRequest() {
 
-    fetch("/feed-request", {method: "POST"});
+    fetch("/feed-request", { method: "POST" });
     console.log("sent request")
 
     // const message = JSON.stringify({ type: "FEED_REQUEST" });

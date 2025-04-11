@@ -49,6 +49,41 @@ public class Agent {
         Agent agent = createAgent();
 
         if (agent != null) {
+
+
+            new Thread(() -> {
+
+                int reconnectAttempts = 0;
+    
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                while (true) {
+    
+                    if (!agent.webSocketClient.isOpen()) {
+                        reconnectAttempts++;
+                        agent.initializeWebSocketClient();
+                        // agent.initializedWebcam();
+                        ServerManager.consolePrint(AGENT, "[" + reconnectAttempts + "] ATTEMPTING RECONNECTION",
+                                ServerManager.YELLOW);
+                        //         System.out.println("start operating");
+                        agent.startOperating();
+                    } else {
+                        reconnectAttempts = 0;
+                    }
+    
+                    try {
+                        Thread.sleep(5000); // 30 seconds
+                    } catch (Exception e) {
+                    }
+                }
+            }).start();
+
+
             agent.startOperating();
             System.out.println("|===== #AGENT =====|================ LOG ================|");
         } else {
@@ -62,36 +97,10 @@ public class Agent {
         // Connect to the server.
         webSocketClient.connect();
 
-        new Thread(() -> {
-
-            int reconnectAttempts = 0;
-
-
-            while (true) {
-
-                if (!webSocketClient.isOpen()) {
-                    reconnectAttempts++;
-                    ServerManager.consolePrint(AGENT, "ATTEMPTING RECONNECTION (" + reconnectAttempts + ")", ServerManager.RED);
-                    initializeWebSocketClient();
-                    webSocketClient.connect();
-                } 
-                else {
-                    reconnectAttempts = 0;
-                }
-
-                try {
-                    Thread.sleep(5000); // 30 seconds
-                } 
-                catch (Exception e) {}
-            }
-        }).start();
-
         // Start sending the webcam data.
-        if (webSocketClient.isOpen()) {
 
+        if (webSocketClient.isOpen()) {
             webcamSendingThread.start();
-        } else {
-            ServerManager.consolePrint(AGENT, "COULDN'T CONNECT", ServerManager.RED);
         }
 
     }
@@ -103,6 +112,9 @@ public class Agent {
         // Create default agent object.
         Agent agent = new Agent();
 
+        // ? agent.initializedSerialPort(): pass || System.out.println("SERIAL PORT
+        // FAILED");; return null;
+
         // Initialize all components: serialPort, webcam, and the websocket connection;
         // only proceed if all are initialized.
         if (agent.initializedSerialPort() && agent.initializedWebcam() && agent.initializeWebSocketClient()) {
@@ -112,6 +124,7 @@ public class Agent {
             // Setup the thread for sending webcam data.
             agent.webcamSendingThread = new Thread() {
                 public void run() {
+                    System.out.println("started running cam sender");
                     try {
 
                         // Perform the following all the time.
@@ -135,6 +148,7 @@ public class Agent {
 
                             // Pause sending (to prevent overflow) momentarily.
                             Thread.sleep(1000 / WEBCAM_SENDING_FPS);
+                            System.out.println("webcam sent");
                         }
                     } catch (Exception exception) {
                         ServerManager.consolePrint(AGENT, "CAMERA SENDING FAILED", ServerManager.RED);
@@ -237,7 +251,46 @@ public class Agent {
                 @Override
                 public void onOpen(ServerHandshake handshake) {
                     ServerManager.consolePrint(AGENT, "WEBSOCKET CONNECTION OK", ServerManager.GREEN);
+                
+                    // If a previous thread was running, stop it cleanly
+                    if (webcamSendingThread != null && webcamSendingThread.isAlive()) {
+                        webcamSendingThread.interrupt();
+                        ServerManager.consolePrint(AGENT, "PREVIOUS CAMERA THREAD INTERRUPTED", ServerManager.YELLOW);
+                    }
+                
+                    // Create and start a new webcam sending thread
+                    webcamSendingThread = new Thread(() -> {
+                
+                        try {
+                            while (!Thread.currentThread().isInterrupted()) {
+                
+                                BufferedImage image = webcam.getImage();
+                                if (image == null) {
+                                    ServerManager.consolePrint(AGENT, "CAMERA IMAGE IS NULL", ServerManager.RED);
+                                    continue;
+                                }
+                
+                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                ImageIO.write(image, "PNG", byteArrayOutputStream);
+                                byte[] imageBytes = byteArrayOutputStream.toByteArray();
+                                String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+                                feederData.encodedImage = base64Image;
+                
+                                webSocketClient.send(feederData.toJsonString());
+                
+                                Thread.sleep(1000 / WEBCAM_SENDING_FPS);
+                            }
+                        } catch (InterruptedException e) {
+                            ServerManager.consolePrint(AGENT, "CAMERA THREAD INTERRUPTED", ServerManager.YELLOW);
+                        } catch (Exception e) {
+                            ServerManager.consolePrint(AGENT, "CAMERA SENDING FAILED: " + e.getMessage(), ServerManager.RED);
+                            e.printStackTrace();
+                        }
+                    });
+                
+                    webcamSendingThread.start();
                 }
+                
 
                 // Method for what to do when recieve message.
 
@@ -269,6 +322,7 @@ public class Agent {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
+                    // ServerManager.consolePrint(AGENT, "WEBSOCKET DISCONNECTED", ServerManager.RED);
                 }
 
                 @Override
