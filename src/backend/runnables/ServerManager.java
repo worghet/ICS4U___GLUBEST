@@ -265,7 +265,9 @@ public class ServerManager {
                             case "FEEDER_DATA":
 
                                 for (WebSocket watcher : activeWatchers) {
-                                    watcher.send(message);
+                                    if (!watcher.equals(agentSocket)) {
+                                        watcher.send(message);
+                                    }
                                 }
                                 // broadcast only to WATCHERS (memory :::)
                                 // for (WebSocket userSocket : activeUsers.keySet()) {
