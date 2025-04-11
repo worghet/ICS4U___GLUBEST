@@ -297,6 +297,8 @@ public class Agent {
                 @Override
                 public void onMessage(String message) {
 
+                    System.out.println("got message: " + message);
+
                     // Check that the broadcast message was "FEED".
 
                     switch (message) {
@@ -311,10 +313,12 @@ public class Agent {
 
                             break;
                         case "ADD_WATCHER":
+                        System.out.println("ADDED VEIW COUNTER");
                             feederData.viewerCount++;
                             break;
 
                         case "REMOVE_WATCHER":
+                            System.out.println("REMOVED VEIW COUNTER");
                             feederData.viewerCount--;
                             break;
                     }

@@ -7,9 +7,11 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.java_websocket.WebSocket;
+import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
@@ -25,7 +27,7 @@ import backend.user.User;
 public class ServerManager {
 
     final static Gson gson = new Gson();
-    private static HashMap<WebSocket, User> activeUsers;
+    private static ArrayList<WebSocket> activeWatchers = new ArrayList<>();
     private static WebSocket agentSocket;
 
     // Actual Servers.
@@ -229,6 +231,8 @@ public class ServerManager {
 
                             // prolly use login + session storage to recognize users on load
 
+                            activeWatchers.add(conn);
+
                             consolePrint(WEBSOCKET, "CLIENT CONNECTED", CYAN);
                             agentSocket.send("ADD_WATCHER");
                         }
@@ -246,6 +250,7 @@ public class ServerManager {
                         } else {
                             consolePrint(WEBSOCKET, "CLIENT DISCONNECTED", CYAN);
                             agentSocket.send("REMOVE_WATCHER");
+                            activeWatchers.remove(conn);
                         }
 
                     }
@@ -258,7 +263,10 @@ public class ServerManager {
 
                         switch (messageType) {
                             case "FEEDER_DATA":
-                                broadcast(message);
+
+                                for (WebSocket watcher : activeWatchers) {
+                                    watcher.send(message);
+                                }
                                 // broadcast only to WATCHERS (memory :::)
                                 // for (WebSocket userSocket : activeUsers.keySet()) {
                                 // User user = activeUsers.get(userSocket);
