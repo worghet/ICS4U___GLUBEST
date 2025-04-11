@@ -1,84 +1,93 @@
+// == CONNECTION CONSTANTS ===========================
+const FEEDER_API = "18.218.44.44:8090";
+let SOCKET;
 
-// CONSTANTS
-// 10.0.0.198:8090
-const FEEDER_API = "18.218.44.44:8090"; //18.218.44.44:8090
+
+// == DOM CONSTANTS ==================================
 const VIDEO_FEED_BOX = document.getElementById("video-feed-box");
-const VIEWER_COUNT_ELEMENT = document.getElementById("viewer-count")
-const LAST_FED_ELEMENT = document.getElementById("last-fed")
-const socket = new WebSocket(`ws://${FEEDER_API}`);
-let USER_ID;
+const VIEWER_COUNT_ELEMENT = document.getElementById("viewer-count");
+const LAST_FED_ELEMENT = document.getElementById("last-fed");
 
 
+// == ON LOAD / CLOSE ================================
 
-// ON OPEN, CONNECT (SWITCH TO THE PROPER API)
+
+// This method runs when the page is loaded.
 window.onload = function () {
 
     try {
-        setupWebsocketClient();
-        console.log("Successfully connected to:", FEEDER_API);
 
+        // Setup the actual connection.
+        setupWebsocketClient();
+
+        // Print a log message
+        console.log("SUCCESSFULLY CONNECTED TO: ", FEEDER_API);
 
     }
     catch (exception) {
-        console.log("Couldn't connect to server")
+        console.log("FAILED TO CONNECT TO: ", FEEDER_API);
     }
 
 };
 
 window.onclose = function () {
 
-    socket.close();
+    // On exiting / closing the page; disconnect the socket.
+    SOCKET.close();
 
 }
 
+
 // == OTHER FUNCTIONS ========================================
+
 
 function setupWebsocketClient() {
 
     // Setup socket connection.
 
+    SOCKET = new WebSocket(`ws://${FEEDER_API}`);
 
-    // Establish relavant methods.
+    // Setup relevant methods.
+
+    SOCKET.onopen = function (event) {};
+    SOCKET.onclose = function (event) {};
+    SOCKET.onerror = function (event) {};
 
 
-    socket.onopen = function (event) {
+    SOCKET.onmessage = function (event) {
 
-        // socket.send(JSON.stringify({ type: 'ROLE_ASSIGNMENT', role: 'WATCHING_CAT' }));
-
-
-    };
-
-    socket.onmessage = function (event) {
-
+        // Unpackage the data.
         let data = JSON.parse(event.data);
+        
+        // Identify each segment of the data.
         let imageBase64 = data.encodedImage;
         let viewerCount = data.viewerCount;
         let lastFedTime = data.formattedLastTimeFed;
 
+
+        // Update corresponding HTML elements.
         VIDEO_FEED_BOX.innerHTML = "";
         VIDEO_FEED_BOX.style.backgroundImage = "url('data:image/png;base64," + imageBase64 + "')";
-        LAST_FED_ELEMENT.innerText = lastFedTime;
         VIEWER_COUNT_ELEMENT.innerText = viewerCount;
+        LAST_FED_ELEMENT.innerText = lastFedTime;
 
-};
-
-
-
-socket.onclose = function (event) { };
-socket.onerror = function (event) { };
+    };
 
 }
 
 function sendFeedRequest() {
 
-    fetch("/feed-request", { method: "POST" });
-    console.log("sent request")
+    // Send a simple HTTP request to the server, 
+    // which then relays it to the Agent computer.
 
-    // const message = JSON.stringify({ type: "FEED_REQUEST" });
-    // socket.send(message);
+    fetch("/feed-request", { method: "POST" });
+    
+    // Notify console that it has been fulfilled.
+    console.log("FEED REQUEST SENT.")
 }
 
 function backToMainMenu() {
+
+    // Just changes the location to the main page.
     window.location.href = "/glubest";
 }
-

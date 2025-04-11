@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en">
 
 <!-- HEAD -->
 
@@ -13,49 +14,57 @@
 
 <body>
 
+    <!-- BACK TO MENU BUTTON (TOP-LEFT) -->
+
     <button class="button back-to-feed-button" onclick="backToMainMenu()"><</button>
+
+    <!-- LEFT SECTION (TITLE / SUBTITLE, FEED BUTTON) -->
 
     <div class="left-section">
 
-
+        <!-- TITLE -->
+        
         <h1 class="video-feed-title">GLUBEST </h1>
+        
+        <!-- SUBTITLE -->
+        
         <h1 class="video-feed-title subtitle">// FEEDER</h1>
-        <!-- <h1 class="video-feed-title subtitle">
-            WATCHING: <span id="viewer-count">0</span> // LAST FED: <span id="last-fed">Unknown</span>
-        </h1> -->
+        
+        <!-- FEED BUTTON -->
+
         <button class="button" onclick="sendFeedRequest()">FEED THE BEAST</button>
-
-
 
     </div>
 
+    <!-- RIGHT SECTION (WINDOW: LAST FED, VIEWERS, CAMERA FEED) -->
 
     <div class="right-section">
         
+        <!-- WINDOW -->
+
         <div class="window">
+
+            <!-- TOP BAR -->
+
             <div class="top-bar">
 
+                <!-- LAST FED TEXT -->
+
                 <div class="last-fed">LAST FED // <b id="last-fed">UNKNOWN</b></div>
+                
+                <!-- VIEWER COUNT TEXT -->
+
                 <div class="viewer-count">VIEWERS // <b id="viewer-count">2</b></div>
 
-
             </div>
-            <div class="bottom-bar" id="video-feed-box">[CAMERA FEED HERE]</div>
 
+            <!-- BOTTOM BAR (CAMERA FEED) -->
+
+            <div class="bottom-bar" id="video-feed-box">[CAMERA FEED HERE]</div>
 
         </div>
 
     </div>
-
-    <!-- TITLE -->
-
-    
-
-    <!-- <div id="video-feed-box"></div>
-
-    <div>
-        <button class="button">></button>
-    </div>  -->
 
     <!-- SCRIPT -->
 

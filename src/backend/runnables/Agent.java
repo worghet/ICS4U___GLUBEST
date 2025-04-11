@@ -4,89 +4,112 @@ package backend.runnables;
 import org.java_websocket.handshake.ServerHandshake;
 import org.java_websocket.client.WebSocketClient;
 import com.fazecast.jSerialComm.SerialPort;
+import java.time.format.DateTimeFormatter;
 import java.io.ByteArrayOutputStream;
 import java.awt.image.BufferedImage;
 import com.github.sarxos.webcam.*;
+import java.time.LocalDateTime;
 import javax.imageio.ImageIO;
 import java.util.Scanner;
-import com.google.gson.*;
 import java.util.Base64;
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 // == AGENT ========
 public class Agent {
 
+
     // == CLASS CONSTANTS ========================================
+
 
     private static final String AGENT = "   AGENT  ";
     private static final String SERIAL_PORT_NAME = "/dev/ttyACM0"; // linux-specific.
     public static final String FEED_KEYWORD = "FEED";
-    private static final int WEBCAM_SENDING_FPS = 5;
+    private static final int WEBCAM_SENDING_FPS = 10;
+
 
     // == FUNCTIONAL CONSTANTS ===================================
 
+
     final static Scanner input = new Scanner(System.in);
 
+
     // == INSTANCE VARIABLES =====================================
+
 
     WebSocketClient webSocketClient; // Websocket client itself.
     Thread webcamSendingThread; // Separate thread meant to send webcam data.
     SerialPort serialPort; // Port access to write to Arduino.
+    FeederData feederData; // The data which is sent to server.
     Webcam webcam; // Webcam object.
-    FeederData feederData;
+
 
     // == MAIN ====================================================
+
 
     // This main will be run on the agent computer.
     public static void main(String[] args) {
 
-        // Setup agent object
+        // Setup agent object.
         System.out.println("|========================================================|");
         System.out.println("|===== #AGENT =====|=============== SETUP ===============|");
 
         Agent agent = createAgent();
 
+        // If the initialization was successful.
         if (agent != null) {
 
-
+            // Start a thread which checks connection, and
+            // reconnects if detects that its lost connection.
             new Thread(() -> {
 
+                // Variable for readability.
                 int reconnectAttempts = 0;
     
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                // Initial pause (to allow for initial connection attempt).
+                try { Thread.sleep(5000); } catch (InterruptedException e) {}
 
+                // This will always run.
                 while (true) {
     
+                    // If the connection is closed.
+                    // (i.e. Needs to reconnect.)
                     if (!agent.webSocketClient.isOpen()) {
+                        
+                        // Uptick the number of reconnection ticks.
                         reconnectAttempts++;
+
+                        // Re-initialize the client.
                         agent.initializeWebSocketClient();
-                        // agent.initializedWebcam();
-                        ServerManager.consolePrint(AGENT, "[" + reconnectAttempts + "] ATTEMPTING RECONNECTION",
-                                ServerManager.YELLOW);
-                        //         System.out.println("start operating");
+
+                        // Notify console of reconnection attempt.
+                        ServerManager.consolePrint(AGENT, "[" + reconnectAttempts + "] ATTEMPTING RECONNECTION", ServerManager.YELLOW);
+                        
+                        // Attempt re-connection.
                         agent.startOperating();
-                    } else {
+                    } 
+                    
+                    // If is connected.
+                    else {
+
+                        // Reset attempts.
                         reconnectAttempts = 0;
+
                     }
     
-                    try {
-                        Thread.sleep(5000); // 30 seconds
-                    } catch (Exception e) {
-                    }
+                    // Pause for 30 seconds (30 000 milliseconds).
+                    try { Thread.sleep(5000); } catch (Exception e) {}
                 }
-            }).start();
+            }).start(); // Start this thread.
 
-
+            // Start the agent.
             agent.startOperating();
+
+            // Begin logging details.
             System.out.println("|===== #AGENT =====|================ LOG ================|");
-        } else {
+        } 
+        
+        // If it is null; report it, dont do anything.
+        else {
             ServerManager.consolePrint(AGENT, "AGENT IS NULL", ServerManager.RED);
         }
 
@@ -97,8 +120,7 @@ public class Agent {
         // Connect to the server.
         webSocketClient.connect();
 
-        // Start sending the webcam data.
-
+        // Start sending the webcam data (if connection successful).
         if (webSocketClient.isOpen()) {
             webcamSendingThread.start();
         }
@@ -112,50 +134,13 @@ public class Agent {
         // Create default agent object.
         Agent agent = new Agent();
 
-        // ? agent.initializedSerialPort(): pass || System.out.println("SERIAL PORT
-        // FAILED");; return null;
-
-        // Initialize all components: serialPort, webcam, and the websocket connection;
-        // only proceed if all are initialized.
+        // Ensure that all have been initialized properly: Serial Port (Arduino), Webcam, and WebsocketClient.
         if (agent.initializedSerialPort() && agent.initializedWebcam() && agent.initializeWebSocketClient()) {
 
+            // Initialize feederdata.
             agent.feederData = new FeederData();
 
-            // Setup the thread for sending webcam data.
-            agent.webcamSendingThread = new Thread() {
-                public void run() {
-                    System.out.println("started running cam sender");
-                    try {
-
-                        // Perform the following all the time.
-
-                        while (true) {
-
-                            // Read image from webcam.
-                            BufferedImage image = agent.webcam.getImage();
-
-                            // Take the image, and rewrite it in Base64; as we can't simply send png over
-                            // network.
-                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            ImageIO.write(image, "PNG", byteArrayOutputStream);
-                            byte[] imageBytes = byteArrayOutputStream.toByteArray();
-                            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-
-                            agent.feederData.encodedImage = base64Image;
-
-                            // Send the encoded image to server.
-                            agent.webSocketClient.send(agent.feederData.toJsonString());
-
-                            // Pause sending (to prevent overflow) momentarily.
-                            Thread.sleep(1000 / WEBCAM_SENDING_FPS);
-                            System.out.println("webcam sent");
-                        }
-                    } catch (Exception exception) {
-                        ServerManager.consolePrint(AGENT, "CAMERA SENDING FAILED", ServerManager.RED);
-                    }
-                }
-            };
-
+            // Report that the construction (initialization) of the agent was successful.
             ServerManager.consolePrint(AGENT, "CONSTRUCTION OK", ServerManager.GREEN);
 
             // If all initiallization was good, return the agent as a new object.

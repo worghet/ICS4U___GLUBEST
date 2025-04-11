@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- HEAD -->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Glubest — Main</title>
+
+    <!-- DOCUMENT CSS -->
 
     <style>
         body {
@@ -110,31 +114,33 @@
     </style>
 </head>
 
+<!-- BODY -->
+
 <body>
 
+    <!-- TITLE -->
+
     <h1 class="title">GLUBEST</h1>
+
+    <!-- SUBTITLE -->
+
     <h1 class="subtitle">MIKE BUSHKOV // ICS4U___03</h1>
 
-    <div class="email-form">
-        <input type="email" class="email-input" placeholder="Enter your username..." />
-        <button class="email-button" onclick="goToChatroom()">JOIN (<b>0</b>)</button>
-    </div>
+    <!-- GO TO FEEDER BUTTON-->
 
+    <button class="button" onclick="goToFeeder()">GO TO THE FEEDER</button>
+    
+    <!-- RANDOMIZE PHOTOS BUTTON -->
 
-    <button class="button" onclick="goToFeeder()">FEED THE BEASTS</button>
+    <button class="button" onclick="">RANDOMIZE PHOTOS</button>
 
+    <!-- DOCUMENT JAVASCRIPT -->
 
     <script>
 
         function goToFeeder() {
 
-            // if user doesnt exist, make them a user, set them to "WATCHER"
-
             window.location.href = "/feeder";
-        }
-
-        function goToChatroom() {
-            window.location.href = "/chatroom";
         }
 
     </script>
