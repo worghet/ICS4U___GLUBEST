@@ -24,7 +24,7 @@ public class Agent {
     private static final String AGENT = "   AGENT  ";
     private static final String SERIAL_PORT_NAME = "/dev/ttyACM0"; // linux-specific.
     public static final String FEED_KEYWORD = "FEED";
-    private static final int WEBCAM_SENDING_FPS = 10;
+    private static final int WEBCAM_SENDING_FPS = 30;
 
 
     // == FUNCTIONAL CONSTANTS ===================================
@@ -97,7 +97,7 @@ public class Agent {
                     }
     
                     // Pause for 30 seconds (30 000 milliseconds).
-                    try { Thread.sleep(5000); } catch (Exception e) {}
+                    try { Thread.sleep(30000); } catch (Exception e) {}
                 }
             }).start(); // Start this thread.
 
@@ -226,7 +226,7 @@ public class Agent {
             // (more efficient).
             String global = "ws://18.218.44.44:8090/agent";
             String local = "ws://10.0.0.198:8090/agent";
-            URI serverUri = URI.create(global); // "ws://18.218.44.44:8090/agent"
+            URI serverUri = URI.create(local); // "ws://18.218.44.44:8090/agent"
 
             // Initialize the websocket client.
             webSocketClient = new WebSocketClient(serverUri) {
@@ -256,7 +256,7 @@ public class Agent {
                                 }
                 
                                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                ImageIO.write(image, "PNG", byteArrayOutputStream);
+                                ImageIO.write(image, "JPEG", byteArrayOutputStream);
                                 byte[] imageBytes = byteArrayOutputStream.toByteArray();
                                 String base64Image = Base64.getEncoder().encodeToString(imageBytes);
                                 feederData.encodedImage = base64Image;
@@ -281,8 +281,6 @@ public class Agent {
 
                 @Override
                 public void onMessage(String message) {
-
-                    System.out.println("got message: " + message);
 
                     // Check that the broadcast message was "FEED".
 

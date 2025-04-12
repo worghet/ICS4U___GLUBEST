@@ -161,6 +161,11 @@ public class ServerManager {
                     requestedPath = "chatroom/chatroom.html";
                     break;
                 default:
+
+                    if (requestedPath.startsWith("/resources/")) {
+                        // Extract image name (e.g., "/dev-photos/3.jpg")
+                        requestedPath = "resources/" + requestedPath.substring(11);
+                    }
                     // Leave as is; assume it's a direct file reference
                     break;
             }
@@ -264,6 +269,7 @@ public class ServerManager {
                         switch (messageType) {
                             case "FEEDER_DATA":
 
+                                System.out.println("feeder message size: " + message.length());
                                 for (WebSocket watcher : activeWatchers) {
                                     if (!watcher.equals(agentSocket)) {
                                         watcher.send(message);

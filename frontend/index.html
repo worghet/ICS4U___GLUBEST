@@ -1,106 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!-- HEAD -->
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Glubest — Main</title>
-
-    <!-- DOCUMENT CSS -->
-
     <style>
         body {
-            background-color: gainsboro;
             margin: 0;
             padding: 0;
+            background-color: gainsboro;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: monospace;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 90vw;
+            height: 90vh;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .left-panel {
             display: flex;
             flex-direction: column;
-            width: 100vw;
-            height: 100vh;
-            align-items: center;
             justify-content: center;
-            text-align: center;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .left-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: max-content;
         }
 
         .title {
             color: black;
-            font-size: 12em;
-            font-family: monospace;
-            padding: 0;
+            font-size: 8.3em;
             margin: 0;
         }
 
         .subtitle {
-            padding: 0;
-            margin: 0;
-            margin-top: -2%;
-            margin-bottom: 5%;
             color: black;
-            font-size: 3em;
-            font-family: monospace;
-
+            font-size: 2.2em;
+            margin-top: -1%;
+            margin-bottom: 5%;
         }
 
-        .email-form {
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-            margin-bottom: 2%;
-        }
-
-        .email-input {
-            font-size: 2.1em;
-            padding: 0px 34px;
-            border-radius: 5px 0 0 5px;
+        .button {
+            width: 100%;
+            font-size: 2.2em;
             border: none;
+            padding: 28px 80px;
             font-family: monospace;
-            font-weight: bold;
-            flex: 1;
-            box-shadow: 0 10px 0 rgb(180, 180, 180);
-            height: 100%;
-        }
-
-        .email-button {
-            font-size: 3.5em;
-            padding: 17px 50px;
-            border-radius: 0 5px 5px 0;
-            border: none;
+            margin-bottom: 20px;
+            margin-top: 10px;
+            border-radius: 5px;
             color: whitesmoke;
             font-weight: bold;
-            font-family: monospace;
             background-color: rgb(96, 96, 96);
             box-shadow: 0 10px 0 rgb(72, 72, 72);
             cursor: pointer;
             transition: filter 0.15s, transform 0.05s, box-shadow 0.05s;
-        }
-
-        .email-button:hover {
-            filter: brightness(0.9);
-        }
-
-        .email-button:active {
-            box-shadow: none;
-            transform: translateY(5px);
-        }
-
-
-
-        .button {
-            font-size: 3.5em;
-            border: none;
-            padding: 10px 150px;
-            padding-top: 17px;
-            border-radius: 5px;
-            color: whitesmoke;
-            font-weight: bold;
-            font-family: monospace;
-            background-color: rgb(96, 96, 96);
-            box-shadow: 0 10px 0 rgb(72, 72, 72);
-            cursor: pointer;
-            transition: filter 0.15s;
-            transition: transform 0.05s, box-shadow 0.05s;
         }
 
         .button:hover {
@@ -111,37 +80,197 @@
             box-shadow: none;
             transform: translateY(10px);
         }
+
+        .music-controls {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .play-pause-button {
+            width: 103px;
+            height: 103px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 5px;
+            background-color: rgb(96, 96, 96);
+            color: whitesmoke;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 20px;
+            box-shadow: 0px 10px 0px rgb(72, 72, 72);
+            transition: filter 0.15s, transform 0.05s, box-shadow 0.05s;
+            padding: 37px 40px;
+        }
+
+        .play-pause-button:hover {
+            filter: brightness(0.9);
+        }
+
+        .play-pause-button:active {
+            box-shadow: none;
+            transform: translateY(5px);
+        }
+
+        .volume-slider-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            background-color: rgb(96, 96, 96);
+            padding: 40px 15px;
+            border-radius: 5px;
+            box-shadow: 0 10px 0 rgb(72, 72, 72);
+        }
+
+        .track-time {
+            font-size: 1.2em;
+            color: whitesmoke;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .volume-slider {
+            width: 100%;
+            margin: 0;
+            height: 10px;
+            background: rgb(180, 180, 180);
+            border-radius: 10px;
+            appearance: none;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            background: whitesmoke;
+            border: none;
+            border-radius: 50%;
+            /* cursor: pointer; */
+        }
+
+        .image-panel {
+            position: relative;
+            flex: 1;
+            height: 100%;
+            aspect-ratio: 9/16;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px -5px rgb(72, 72, 72);
+        }
+
+        .image-panel img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mini-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 1em;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgb(96, 96, 96);
+            color: whitesmoke;
+            font-weight: bold;
+            font-family: monospace;
+            cursor: pointer;
+            box-shadow: 0 5px 0 rgb(72, 72, 72);
+            transition: filter 0.15s, transform 0.05s, box-shadow 0.05s;
+        }
+
+        .mini-button:hover {
+            filter: brightness(0.9);
+        }
+
+        .mini-button:active {
+            box-shadow: none;
+            transform: translateY(5px);
+        }
     </style>
 </head>
 
-<!-- BODY -->
-
 <body>
 
-    <!-- TITLE -->
+    <div class="container">
+        <div class="left-panel">
+            <div class="left-content">
+                <h1 class="title">GLUBEST</h1>
+                <h2 class="subtitle">MIKE BUSHKOV // ICS4U___03</h2>
+                <button class="button" onclick="goToFeeder()">GO TO THE FEEDER</button>
 
-    <h1 class="title">GLUBEST</h1>
+                <div class="music-controls">
+                    <button class="play-pause-button" onclick="togglePlayPause()"> > </button>
+                    <div class="volume-slider-container">
+                        <span class="track-time" id="current-time">00:00</span>
+                        <input type="range" class="volume-slider" id="seekSlider" min="0" max="100" value="0"
+                            step="0.01" disabled />
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <!-- SUBTITLE -->
-
-    <h1 class="subtitle">MIKE BUSHKOV // ICS4U___03</h1>
-
-    <!-- GO TO FEEDER BUTTON-->
-
-    <button class="button" onclick="goToFeeder()">GO TO THE FEEDER</button>
-    
-    <!-- RANDOMIZE PHOTOS BUTTON -->
-
-    <button class="button" onclick="">RANDOMIZE PHOTOS</button>
-
-    <!-- DOCUMENT JAVASCRIPT -->
+        <div class="image-panel">
+            <img id="mainImage" src="/resources/4.jpg" />
+            <button class="mini-button" onclick="getRandomDevPhoto()">GET RANDOM DEV PHOTO</button>
+        </div>
+    </div>
 
     <script>
+        const audio = new Audio('/resources/glubest.mp3');
+        audio.loop = true;
+        audio.volume = 0.3;
+
+        const seekSlider = document.getElementById("seekSlider");
+        const currentTimeDisplay = document.getElementById("current-time");
+        let isPlaying = false;
+        let isSeeking = false;
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes < 10 ? '0' : ''}${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function togglePlayPause() {
+            if (isPlaying) {
+                audio.pause();
+                document.querySelector('.play-pause-button').textContent = ' > ';
+            } else {
+                audio.play();
+                document.querySelector('.play-pause-button').textContent = '||';
+            }
+            isPlaying = !isPlaying;
+        }
 
         function goToFeeder() {
-
             window.location.href = "/feeder";
         }
+
+        function getRandomDevPhoto() {
+            const img = document.getElementById("mainImage");
+            const randomNum = Math.floor(Math.random() * 8);
+            img.src = `/resources/${randomNum}.jpg`;
+        }
+
+
+        audio.addEventListener("timeupdate", () => {
+                seekSlider.value = audio.currentTime;
+                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        });
+
+        setInterval(() => {
+
+            localStorage.setItem("glubest_audio_time", audio.currentTime);
+        }, 1000);
 
     </script>
 

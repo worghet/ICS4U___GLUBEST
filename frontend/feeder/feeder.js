@@ -1,5 +1,5 @@
 // == CONNECTION CONSTANTS ===========================
-const FEEDER_API = "18.218.44.44:8090";
+const FEEDER_API = "10.0.0.198:8090"; //18.218.44.44
 let SOCKET;
 
 
@@ -14,21 +14,37 @@ const LAST_FED_ELEMENT = document.getElementById("last-fed");
 
 // This method runs when the page is loaded.
 window.onload = function () {
-
     try {
-
         // Setup the actual connection.
         setupWebsocketClient();
-
-        // Print a log message
         console.log("SUCCESSFULLY CONNECTED TO: ", FEEDER_API);
-
-    }
-    catch (exception) {
+    } catch (exception) {
         console.log("FAILED TO CONNECT TO: ", FEEDER_API);
     }
 
+    // == AUDIO HANDLING =========================
+    const audio = new Audio('/resources/glubest.mp3');
+    audio.loop = true;
+    audio.volume = 0.3;
+
+    audio.addEventListener("loadedmetadata", () => {
+        audio.currentTime = 50;
+        console.log("Set current time to 50");
+
+        audio.play().then(() => {
+            console.log("Started playing from 50s");
+        }).catch(err => {
+            console.warn("Autoplay may be blocked:", err);
+        });
+    });
+
+    setInterval(() => {
+        localStorage.setItem("glubest_audio_time", audio.currentTime);
+    }, 1000);
 };
+
+
+
 
 window.onclose = function () {
 
@@ -49,16 +65,16 @@ function setupWebsocketClient() {
 
     // Setup relevant methods.
 
-    SOCKET.onopen = function (event) {};
-    SOCKET.onclose = function (event) {};
-    SOCKET.onerror = function (event) {};
+    SOCKET.onopen = function (event) { };
+    SOCKET.onclose = function (event) { };
+    SOCKET.onerror = function (event) { };
 
 
     SOCKET.onmessage = function (event) {
 
         // Unpackage the data.
         let data = JSON.parse(event.data);
-        
+
         // Identify each segment of the data.
         let imageBase64 = data.encodedImage;
         let viewerCount = data.viewerCount;
@@ -81,7 +97,7 @@ function sendFeedRequest() {
     // which then relays it to the Agent computer.
 
     fetch("/feed-request", { method: "POST" });
-    
+
     // Notify console that it has been fulfilled.
     console.log("FEED REQUEST SENT.")
 }
