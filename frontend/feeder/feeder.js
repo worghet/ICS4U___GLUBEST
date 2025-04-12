@@ -7,6 +7,9 @@ let SOCKET;
 const VIDEO_FEED_BOX = document.getElementById("video-feed-box");
 const VIEWER_COUNT_ELEMENT = document.getElementById("viewer-count");
 const LAST_FED_ELEMENT = document.getElementById("last-fed");
+const click = new Audio("/resources/click.wav")
+const meow = new Audio("/resources/meow.mp3")  
+
 
 
 // == ON LOAD / CLOSE ================================
@@ -22,34 +25,40 @@ window.onload = function () {
         console.log("FAILED TO CONNECT TO: ", FEEDER_API);
     }
 
-    // == AUDIO HANDLING =========================
-    const audio = new Audio('/resources/glubest.mp3');
-    audio.loop = true;
-    audio.volume = 0.3;
+    const audio = document.getElementById("bg-music");
+    audio.volume = 0.4;
 
-    audio.addEventListener("loadedmetadata", () => {
-        audio.currentTime = 50;
-        console.log("Set current time to 50");
+    const savedTime = parseFloat(localStorage.getItem("glubest_audio_time")) || 0;
 
-        audio.play().then(() => {
-            console.log("Started playing from 50s");
-        }).catch(err => {
-            console.warn("Autoplay may be blocked:", err);
-        });
-    });
+   console.log(document.getElementById("bg-music"));
 
+   
+        console.log('mtdata loaded')
+        if (localStorage.getItem("bg-playing") == "true") {
+            audio.play();  // Start playing after setting the currentTime
+            console.log(localStorage.getItem("glubest_audio_time"));
+
+            audio.currentTime = savedTime;//localStorage.getItem("glubest_audio_time");
+           
+        }
+
+    // Set the starting time when the audio starts playing
     setInterval(() => {
-        localStorage.setItem("glubest_audio_time", audio.currentTime);
+        console.log(audio.currentTime);
     }, 1000);
 };
 
 
-
+// audio.currentTime = 20;// localStorage.getItem("glubest_audio_time");  // Set the time before playing
+// console.log(audio.currentTime);  // Should log '20'
 
 window.onclose = function () {
 
     // On exiting / closing the page; disconnect the socket.
     SOCKET.close();
+
+    localStorage.setItem("glubest_audio_time", audio.currentTime);
+
 
 }
 
@@ -74,6 +83,7 @@ function setupWebsocketClient() {
 
         // Unpackage the data.
         let data = JSON.parse(event.data);
+        console.log(data)
 
         // Identify each segment of the data.
         let imageBase64 = data.encodedImage;
@@ -93,6 +103,8 @@ function setupWebsocketClient() {
 
 function sendFeedRequest() {
 
+    meow.play();
+
     // Send a simple HTTP request to the server, 
     // which then relays it to the Agent computer.
 
@@ -100,9 +112,12 @@ function sendFeedRequest() {
 
     // Notify console that it has been fulfilled.
     console.log("FEED REQUEST SENT.")
+
 }
 
 function backToMainMenu() {
+
+    click.play();
 
     // Just changes the location to the main page.
     window.location.href = "/glubest";

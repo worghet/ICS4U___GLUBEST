@@ -200,6 +200,9 @@
 
 <body>
 
+    <audio id="bg-music" src="/resources/glubest.mp3" loop></audio>
+
+
     <div class="container">
         <div class="left-panel">
             <div class="left-content">
@@ -225,14 +228,51 @@
     </div>
 
     <script>
-        const audio = new Audio('/resources/glubest.mp3');
-        audio.loop = true;
-        audio.volume = 0.3;
+
+        function goToFeeder() {
+            click.play();
+
+            window.location.href = "/feeder";
+        }
+
+        function getRandomDevPhoto() {
+            click.play();
+
+            const img = document.getElementById("mainImage");
+            const randomNum = Math.floor(Math.random() * 8);
+            img.src = `/resources/${randomNum}.jpg`;
+        }
+
+
+        const click = new Audio("/resources/click.wav")
 
         const seekSlider = document.getElementById("seekSlider");
         const currentTimeDisplay = document.getElementById("current-time");
-        let isPlaying = false;
-        let isSeeking = false;
+        const audio = document.getElementById("bg-music");
+        audio.volume = 0.4;
+
+        if (localStorage.getItem("bg-playing")) {
+            if (localStorage.getItem("bg-playing") == "true") {
+                isPlaying = true;
+                if (localStorage.getItem('glubest_audio_time')) {
+                    audio.currentTime = parseFloat(localStorage.getItem("glubest_audio_time")) || 0;
+                }
+
+                document.querySelector('.play-pause-button').textContent = '||';
+                audio.play();
+            }
+            else {
+                document.querySelector('.play-pause-button').textContent = ' > ';
+                isPlaying = false;
+            }
+
+        }
+        else {
+            isPlaying = false;
+            document.querySelector('.play-pause-button').textContent = ' > ';
+        }
+
+        let currentTime = 0;
 
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
@@ -241,36 +281,35 @@
         }
 
         function togglePlayPause() {
+
+            click.play();
+
             if (isPlaying) {
                 audio.pause();
                 document.querySelector('.play-pause-button').textContent = ' > ';
+                localStorage.setItem("bg-playing", "false")
+                isPlaying = false;
             } else {
+
+              
                 audio.play();
                 document.querySelector('.play-pause-button').textContent = '||';
+                localStorage.setItem("bg-playing", "true")
+                isPlaying = true;
             }
-            isPlaying = !isPlaying;
         }
 
-        function goToFeeder() {
-            window.location.href = "/feeder";
-        }
 
-        function getRandomDevPhoto() {
-            const img = document.getElementById("mainImage");
-            const randomNum = Math.floor(Math.random() * 8);
-            img.src = `/resources/${randomNum}.jpg`;
-        }
 
 
         audio.addEventListener("timeupdate", () => {
-                seekSlider.value = audio.currentTime;
-                currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            seekSlider.value = audio.currentTime;
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
         });
 
-        setInterval(() => {
-
+        window.addEventListener('beforeunload', () => {
             localStorage.setItem("glubest_audio_time", audio.currentTime);
-        }, 1000);
+        });
 
     </script>
 

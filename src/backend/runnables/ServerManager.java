@@ -145,10 +145,11 @@ public class ServerManager {
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-
-            // GET REQUESTED PATH
+    
+            // Get the requested path from the URL
             String requestedPath = exchange.getRequestURI().getPath();
-
+    
+            // Route remapping
             switch (requestedPath) {
                 case "/":
                 case "/glubest":
@@ -161,61 +162,59 @@ public class ServerManager {
                     requestedPath = "chatroom/chatroom.html";
                     break;
                 default:
-
                     if (requestedPath.startsWith("/resources/")) {
-                        // Extract image name (e.g., "/dev-photos/3.jpg")
-                        requestedPath = "resources/" + requestedPath.substring(11);
+                        requestedPath = "resources/" + requestedPath.substring("/resources/".length());
                     }
-                    // Leave as is; assume it's a direct file reference
                     break;
             }
-
+    
+            // Locate the file
             String projectRoot = System.getProperty("user.dir");
-            System.out.println("user requested: " + projectRoot + "/frontend/" + requestedPath);
-
-            File file = new File(projectRoot, "/frontend/" + requestedPath);
-
+            File file = new File(projectRoot, "frontend/" + requestedPath);
+            System.out.println("User requested: " + file.getAbsolutePath());
+    
             if (file.exists() && !file.isDirectory()) {
-
-                // Determine content type
+    
+                // Guess MIME type
                 String contentType = guessContentType(file.getName());
                 exchange.getResponseHeaders().add("Content-Type", contentType);
-
+    
+                // Enable byte-range support (important for media seeking)
+                exchange.getResponseHeaders().add("Accept-Ranges", "bytes");
+    
+                // Send 200 OK and the file
                 exchange.sendResponseHeaders(200, file.length());
-
                 try (OutputStream os = exchange.getResponseBody()) {
                     Files.copy(file.toPath(), os);
                 }
-
+    
             } else {
-                String response = "404 - REQUESTED FILE NOT FOUND";
+                // Handle 404 not found
+                String response = "404 - File Not Found";
                 exchange.sendResponseHeaders(404, response.getBytes().length);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
             }
         }
-
-        // Utility method for content-type guessing
+    
+        // Guess the correct MIME type for the given file extension
         private String guessContentType(String fileName) {
-            if (fileName.endsWith(".html"))
-                return "text/html";
-            if (fileName.endsWith(".css"))
-                return "text/css";
-            if (fileName.endsWith(".js"))
-                return "application/javascript";
-            if (fileName.endsWith(".json"))
-                return "application/json";
-            if (fileName.endsWith(".png"))
-                return "image/png";
-            if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
-                return "image/jpeg";
-            if (fileName.endsWith(".gif"))
-                return "image/gif";
-            return "application/octet-stream";
+            fileName = fileName.toLowerCase();
+            if (fileName.endsWith(".html")) return "text/html";
+            if (fileName.endsWith(".css")) return "text/css";
+            if (fileName.endsWith(".js")) return "application/javascript";
+            if (fileName.endsWith(".json")) return "application/json";
+            if (fileName.endsWith(".png")) return "image/png";
+            if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) return "image/jpeg";
+            if (fileName.endsWith(".gif")) return "image/gif";
+            if (fileName.endsWith(".mp3")) return "audio/mpeg";       // 🔥 Key addition
+            if (fileName.endsWith(".wav")) return "audio/wav";
+            if (fileName.endsWith(".mp4")) return "video/mp4";
+            return "application/octet-stream"; // Default fallback
         }
-
     }
+    
 
     private static void initializeWebSocketServer() {
 
@@ -268,10 +267,11 @@ public class ServerManager {
 
                         switch (messageType) {
                             case "FEEDER_DATA":
-
+                                // broadcast(message);
                                 System.out.println("feeder message size: " + message.length());
                                 for (WebSocket watcher : activeWatchers) {
                                     if (!watcher.equals(agentSocket)) {
+                                        System.out.println("sent " + message);
                                         watcher.send(message);
                                     }
                                 }
