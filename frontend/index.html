@@ -37,6 +37,7 @@
 
         .left-content {
             display: flex;
+            /* margin-right: 50px; */
             flex-direction: column;
             align-items: flex-start;
             width: max-content;
@@ -62,13 +63,14 @@
             padding: 28px 80px;
             font-family: monospace;
             margin-bottom: 20px;
-            margin-top: 10px;
+            margin-top: 15px;
             border-radius: 5px;
             color: whitesmoke;
             font-weight: bold;
             background-color: rgb(96, 96, 96);
             box-shadow: 0 10px 0 rgb(72, 72, 72);
             cursor: pointer;
+            margin-top: 10px;
             transition: filter 0.15s, transform 0.05s, box-shadow 0.05s;
         }
 
@@ -141,6 +143,7 @@
             background: rgb(180, 180, 180);
             border-radius: 10px;
             appearance: none;
+            cursor: pointer;
             outline: none;
         }
 
@@ -151,7 +154,6 @@
             background: whitesmoke;
             border: none;
             border-radius: 50%;
-            /* cursor: pointer; */
         }
 
         .image-panel {
@@ -195,13 +197,103 @@
             box-shadow: none;
             transform: translateY(5px);
         }
+
+        /* 📱 Mobile styles */
+        @media (max-width: 768px) {
+            body {
+                padding-left: 9px;
+                align-items: center;
+                overflow: hidden; /* Disable scrolling */
+            }
+
+            .container {
+                flex-direction: column;
+                width: 100vw;
+                height: auto;
+                padding: 20px 10px;
+            }
+
+            .left-panel,
+            .image-panel {
+                width: 100%;
+                flex: none;
+                margin-bottom: 30px;
+            }
+
+            .left-content {
+                width: 100%;
+                align-items: center;
+                text-align: center;
+            }
+
+            .title {
+                font-size: 6em;
+            }
+
+            .subtitle {
+                font-size: 1.5em;
+                margin-top: 10px;
+                margin-bottom: 20px;
+            }
+
+            .button {
+                font-size: 1.6em;
+                /* font-size: 1.4em; */
+                padding: 20px 40px;
+                width: 90%;
+            }
+
+            .music-controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .play-pause-button {
+                display: none;
+                width: 80px;
+                height: 80px;
+                font-size: 1.2em;
+                padding: 25px 30px;
+            }
+
+            .volume-slider-container {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 10px;
+                width: 90%;
+            }
+
+            .track-time {
+                margin-bottom: 10px;
+            }
+
+            .volume-slider {
+                width: 100%;
+            }
+
+            .image-panel {
+                display: none;
+                aspect-ratio: auto;
+                height: auto;
+            }
+
+            .image-panel img {
+                height: auto;
+            }
+
+            .mini-button {
+                position: static;
+                margin-top: 15px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
     <audio id="bg-music" src="/resources/glubest.mp3" loop></audio>
-
 
     <div class="container">
         <div class="left-panel">
@@ -215,7 +307,7 @@
                     <div class="volume-slider-container">
                         <span class="track-time" id="current-time">00:00</span>
                         <input type="range" class="volume-slider" id="seekSlider" min="0" max="100" value="0"
-                            step="0.01" disabled />
+                            step="0.01"/>
                     </div>
                 </div>
             </div>
@@ -228,51 +320,38 @@
     </div>
 
     <script>
-
         function goToFeeder() {
             click.play();
-
             window.location.href = "/feeder";
         }
 
         function getRandomDevPhoto() {
             click.play();
-
             const img = document.getElementById("mainImage");
             const randomNum = Math.floor(Math.random() * 8);
             img.src = `/resources/${randomNum}.jpg`;
         }
 
-
-        const click = new Audio("/resources/click.wav")
-
+        const click = new Audio("/resources/click.wav");
         const seekSlider = document.getElementById("seekSlider");
         const currentTimeDisplay = document.getElementById("current-time");
         const audio = document.getElementById("bg-music");
         audio.volume = 0.4;
 
+        let isPlaying = false;
+
         if (localStorage.getItem("bg-playing")) {
-            if (localStorage.getItem("bg-playing") == "true") {
-                isPlaying = true;
+            isPlaying = localStorage.getItem("bg-playing") === "true";
+            if (isPlaying) {
                 if (localStorage.getItem('glubest_audio_time')) {
                     audio.currentTime = parseFloat(localStorage.getItem("glubest_audio_time")) || 0;
                 }
-
                 document.querySelector('.play-pause-button').textContent = '||';
                 audio.play();
-            }
-            else {
+            } else {
                 document.querySelector('.play-pause-button').textContent = ' > ';
-                isPlaying = false;
             }
-
         }
-        else {
-            isPlaying = false;
-            document.querySelector('.play-pause-button').textContent = ' > ';
-        }
-
-        let currentTime = 0;
 
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
@@ -281,26 +360,18 @@
         }
 
         function togglePlayPause() {
-
             click.play();
-
             if (isPlaying) {
                 audio.pause();
                 document.querySelector('.play-pause-button').textContent = ' > ';
-                localStorage.setItem("bg-playing", "false")
-                isPlaying = false;
+                localStorage.setItem("bg-playing", "false");
             } else {
-
-              
                 audio.play();
                 document.querySelector('.play-pause-button').textContent = '||';
-                localStorage.setItem("bg-playing", "true")
-                isPlaying = true;
+                localStorage.setItem("bg-playing", "true");
             }
+            isPlaying = !isPlaying;
         }
-
-
-
 
         audio.addEventListener("timeupdate", () => {
             seekSlider.value = audio.currentTime;
@@ -311,6 +382,21 @@
             localStorage.setItem("glubest_audio_time", audio.currentTime);
         });
 
+
+        seekSlider.addEventListener("input", () => {
+            audio.currentTime = seekSlider.value;
+        });
+
+        // Update the slider as the song plays
+        audio.addEventListener("timeupdate", () => {
+            seekSlider.value = audio.currentTime;
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+        });
+
+        // Set the maximum value of the slider to match the audio duration
+        audio.addEventListener('loadedmetadata', () => {
+            seekSlider.max = audio.duration;
+        });
     </script>
 
 </body>

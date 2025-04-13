@@ -268,10 +268,10 @@ public class ServerManager {
                         switch (messageType) {
                             case "FEEDER_DATA":
                                 // broadcast(message);
-                                System.out.println("feeder message size: " + message.length());
+                                // System.out.println("feeder message size: " + message.length());
                                 for (WebSocket watcher : activeWatchers) {
                                     if (!watcher.equals(agentSocket)) {
-                                        System.out.println("sent " + message);
+                                        // System.out.println("sent " + message);
                                         watcher.send(message);
                                     }
                                 }

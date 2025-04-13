@@ -1,3 +1,4 @@
+/* General styles */
 body {
     background-color: gainsboro;
     margin: 0;
@@ -14,7 +15,6 @@ body {
     width: 43%;
     height: 100%;
     display: flex;
-
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -33,17 +33,15 @@ body {
     height: 70%;
     background-color: rgb(196, 196, 196);
     border-radius: 3%;
-    overflow: hidden; 
-
+    overflow: hidden;
 }
 
 .top-bar {
     width: 100%;
-    height:9%;
+    height: 9%;
     border-top-left-radius: 3%;
     border-top-right-radius: 3%;
     background-color: rgb(96, 96, 96);
-  
     display: flex;
 }
 
@@ -57,7 +55,6 @@ body {
     border-bottom-right-radius: 3%;
     color: white;
     font-family: monospace;
-
     font-size: 3em;
     align-content: center;
 }
@@ -93,12 +90,12 @@ body {
     margin: 0;
     padding: 0;
     font-family: monospace;
-    font-size: 7em;
+    font-size: 8em;  /* Smaller title */
     font-weight: bold;
 }
 
 .subtitle {
-    font-size: 5.4em;
+    font-size: 5.8em;  /* Smaller subtitle */
     margin-bottom: 10%;
 }
 
@@ -114,11 +111,14 @@ body {
     box-shadow: 0 10px 0 rgb(72, 72, 72);
     cursor: pointer;
     transition: filter 0.15s;
+    /* margin-top: px; */
     transition: transform 0.05s, box-shadow 0.05s;
 }
+
 .button:hover {
     filter: brightness(0.9);
 }
+
 .button:active {
     box-shadow: none;
     transform: translateY(10px);
@@ -136,7 +136,6 @@ body {
     margin: 0;
     aspect-ratio: 1/1;
     height: 8%;
-
 }
 
 .pause-unpause-button {
@@ -151,5 +150,74 @@ body {
     margin: 0;
     aspect-ratio: 1/1;
     height: 8%;
+}
 
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+    /* Stack sections vertically on mobile */
+    body {
+        display: flex;
+        flex-direction: column;
+        overflow: none;
+        /* justify-content: flex-start; */
+    }
+
+    .left-section, .right-section {
+        width: 100%;
+        padding: 10px;
+        margin: 0;
+        /* justify-content: flex-start; */
+    }
+
+    .window {
+        position: absolute;
+        top: 35%;
+        width: 90%;
+        height: auto;
+        border-radius: 5px;
+    }
+
+    /* Adjust the button size */
+    .button {
+        position: absolute;
+        top: 85%;
+        font-size: 2.5em;
+        padding: 20px 35px;
+        margin: 0;
+    }
+
+    /* Hide back and pause buttons on mobile */
+    .back-to-feed-button,
+    .pause-unpause-button {
+        display: none;
+    }
+
+    /* Video feed will take more height */
+    .bottom-bar {
+        margin: 0;
+        /* margin-top: -50px; */
+        height: 40vh;
+        border-radius: 2px;
+        font-size: 2em;
+        background-position: 25%;
+    
+    }
+
+    .top-bar {
+        display: none;
+    }
+
+    /* Adjust title for mobile */
+    .video-feed-title {
+        margin-top: -50px;
+        font-size: 6em;  /* Smaller title for mobile */
+    }
+
+    .subtitle {
+        margin-top: 5px;
+        font-size: 4.5em;  /* Smaller subtitle for mobile */
+        /* margin- */
+    }
+
+ 
 }

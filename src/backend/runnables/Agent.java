@@ -262,7 +262,7 @@ public class Agent {
                                 feederData.encodedImage = base64Image;
                 
                                 webSocketClient.send(feederData.toJsonString());
-                                System.out.println("sent cam");
+                                // System.out.println("sent cam");
                                 Thread.sleep(1000 / WEBCAM_SENDING_FPS);
                             }
                         } catch (InterruptedException e) {

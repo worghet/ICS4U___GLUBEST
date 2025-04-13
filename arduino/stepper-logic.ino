@@ -1,9 +1,10 @@
+
 // Import stepper library.
 #include <Stepper.h>
 
 // Setup constants.
 const int STEPS_PER_REVOLUTION = 2048;
-const int STEPPER_SPEED = 5;
+const int STEPPER_SPEED = 4;
 
 // Initialize the stepper object.
 Stepper stepper = Stepper(STEPS_PER_REVOLUTION, 8, 10, 9, 11);
@@ -15,24 +16,25 @@ void setup() {
 
   // Set the speed of the motor.
   stepper.setSpeed(STEPPER_SPEED);
-  
+
 }
 
 void loop() {
+
+  //    stepper.step(STEPS_PER_REVOLUTION);
 
   // Check if anything had been entered into the console.
   if (Serial.available()) {
 
     // Read the string sent by the Agent.
-    String input = Serial.readString();  
-    input.trim();
-
-    
-    Serial.println(input);               
+    String input = Serial.readString();
+    //    input.trim();
+    //    Serial.println(String(input) + " called");
 
     // (Technically unnessicary) Ensure feed matches requested one.
     if (input == "FEED") {
-      stepper.step(STEPS_PER_REVOLUTION / 4); // Rotate 90 degrees.
+      //          Serial.println("feeding the cat");
+      stepper.step(STEPS_PER_REVOLUTION / 7);
     }
   }
 }
