@@ -226,7 +226,7 @@ public class Agent {
             // (more efficient).
             String global = "ws://18.218.44.44:8090/agent";
             String local = "ws://10.0.0.198:8090/agent";
-            URI serverUri = URI.create(local); // "ws://18.218.44.44:8090/agent"
+            URI serverUri = URI.create(global); // "ws://18.218.44.44:8090/agent"
 
             // Initialize the websocket client.
             webSocketClient = new WebSocketClient(serverUri) {

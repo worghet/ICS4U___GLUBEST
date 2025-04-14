@@ -1,5 +1,5 @@
 // == CONNECTION CONSTANTS ===========================
-const FEEDER_API = "10.0.0.198:8090"; //18.218.44.44
+const FEEDER_API = "18.218.44.44:8090"; //
 let SOCKET;
 
 
