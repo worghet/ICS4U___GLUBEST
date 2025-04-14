@@ -22,8 +22,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import backend.user.User;
-
 public class ServerManager {
 
     final static Gson gson = new Gson();
