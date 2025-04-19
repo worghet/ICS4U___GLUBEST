@@ -1,5 +1,3 @@
-package backend.runnables;
-
 // == IMPORTS ======================================
 import org.java_websocket.handshake.ServerHandshake;
 import org.java_websocket.client.WebSocketClient;
@@ -24,7 +22,7 @@ public class Agent {
     private static final String AGENT = "   AGENT  ";
     private static final String SERIAL_PORT_NAME = "/dev/ttyACM0"; // linux-specific.
     public static final String FEED_KEYWORD = "FEED";
-    private static final int WEBCAM_SENDING_FPS = 30;
+    private static final int WEBCAM_SENDING_FPS = 15;
 
 
     // == FUNCTIONAL CONSTANTS ===================================
@@ -127,7 +125,9 @@ public class Agent {
 
     }
 
+
     // == OBJECT FACTORY ===========================================
+
 
     public static Agent createAgent() {
 
@@ -157,21 +157,30 @@ public class Agent {
 
     }
 
+
     // == INITIALIZOR METHODS ======================================
+
 
     private boolean initializedSerialPort() {
 
         try {
 
+            // Save access of serial port.
             serialPort = SerialPort.getCommPort(SERIAL_PORT_NAME);
 
-            // Setup serial port (parameters: int baud rate, data size in bits, num stop
-            // bits, parity bits).
+            // Setup serial port (parameters: int baud rate, data size in bits, num stop bits, parity bits).
             serialPort.setComPortParameters(9600, 8, 1, 0);
+            
+            // Open the port.
             serialPort.openPort();
+            
+            // Let console know that all went well.
             ServerManager.consolePrint(AGENT, "SERIAL PORT OK", ServerManager.GREEN);
 
-        } catch (Exception exception) {
+        }
+        
+        // If there's any error
+        catch (Exception exception) {
             ServerManager.consolePrint(AGENT, "SERIAL PORT FAILED", ServerManager.RED);
             return false;
         }
@@ -192,7 +201,10 @@ public class Agent {
             // Open (start) the webcam.
             webcam.open();
 
-        } catch (Exception exception) {
+        } 
+        
+        // If anything goes wrong, let console know.
+        catch (Exception exception) {
             ServerManager.consolePrint(AGENT, "WEBCAM FAILED", ServerManager.RED);
             return false;
         }
@@ -213,7 +225,6 @@ public class Agent {
             // Force the output to be written.
             serialPort.getOutputStream().flush();
 
-            // System.out.println("rotated");
         } catch (Exception exception) {
             System.out.println("sum send went wrong");
         }
@@ -222,8 +233,7 @@ public class Agent {
     public boolean initializeWebSocketClient() {
         try {
 
-            // Recognize the server location (via URI) + Identify that this is the agent
-            // (more efficient).
+            // Recognize the server location (via URI) + Identify that this is the agent (more efficient).
             String global = "ws://18.218.44.44:8090/agent";
             String local = "ws://10.0.0.198:8090/agent";
             URI serverUri = URI.create(global); // "ws://18.218.44.44:8090/agent"
@@ -235,86 +245,100 @@ public class Agent {
 
                 @Override
                 public void onOpen(ServerHandshake handshake) {
+                    
+                    // Let console know that connection was successful.
                     ServerManager.consolePrint(AGENT, "WEBSOCKET CONNECTION OK", ServerManager.GREEN);
                 
-                    // If a previous thread was running, stop it cleanly
+                    // If a previous webcam thread was running, stop it.
                     if (webcamSendingThread != null && webcamSendingThread.isAlive()) {
                         webcamSendingThread.interrupt();
                         ServerManager.consolePrint(AGENT, "PREVIOUS CAMERA THREAD INTERRUPTED", ServerManager.YELLOW);
                     }
                 
-                    // Create and start a new webcam sending thread
+                    // Create and start a new webcam sending thread.
                     webcamSendingThread = new Thread(() -> {
                 
                         try {
+                
+                            // While this thread is allowed to run (is not interrupted)
                             while (!Thread.currentThread().isInterrupted()) {
                 
+                                // Take a picture with the webcam.
                                 BufferedImage image = webcam.getImage();
-                                if (image == null) {
-                                    ServerManager.consolePrint(AGENT, "CAMERA IMAGE IS NULL", ServerManager.RED);
-                                    continue;
-                                }
-                
+
+                                // Write the image in a base64 format.
                                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                 ImageIO.write(image, "JPEG", byteArrayOutputStream);
                                 byte[] imageBytes = byteArrayOutputStream.toByteArray();
                                 String base64Image = Base64.getEncoder().encodeToString(imageBytes);
                                 feederData.encodedImage = base64Image;
                 
+                                // Actually send the image.
                                 webSocketClient.send(feederData.toJsonString());
-                                // System.out.println("sent cam");
+                                
+                                // Pause the sending (to accomodate for desired FPS)
                                 Thread.sleep(1000 / WEBCAM_SENDING_FPS);
                             }
-                        } catch (InterruptedException e) {
-                            ServerManager.consolePrint(AGENT, "CAMERA THREAD INTERRUPTED", ServerManager.YELLOW);
-                        } catch (Exception e) {
+                        } 
+                        
+                        // If anything goes wrong, let console know.
+                        catch (Exception e) {
                             ServerManager.consolePrint(AGENT, "CAMERA SENDING FAILED: " + e.getMessage(), ServerManager.RED);
-                            e.printStackTrace();
                         }
                     });
                 
+                    // Start the thread we just made.
                     webcamSendingThread.start();
                 }
                 
 
-                // Method for what to do when recieve message.
+                // Method for what to do when a message is recieved.
 
                 @Override
                 public void onMessage(String message) {
 
-                    // Check that the broadcast message was "FEED".
+                    // Understand what the message was.
 
                     switch (message) {
 
+                        // If the message was "FEED", then tell the arduino to rotate.
                         case FEED_KEYWORD:
-                            performArduinoRotation();
-                            feederData.formattedLastTimeFed = LocalDateTime.now()
-                                    .format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
 
-                            ServerManager.consolePrint(AGENT, "FEEDING COMPLETE @ " + feederData.formattedLastTimeFed,
-                                    ServerManager.BLUE);
+                            // Rotate the motor.
+                            performArduinoRotation();
+
+                            // Update the "last fed" variable in the feederData
+                            feederData.formattedLastTimeFed = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss (dd / MM / yyyy)"));
+
+                            // Let console know that feeding was complete.
+                            ServerManager.consolePrint(AGENT, "FEEDING COMPLETE @ " + feederData.formattedLastTimeFed, ServerManager.BLUE);
 
                             break;
+
+                        // If a new user tuned in, increment the viewer count.    
                         case "ADD_WATCHER":
-                        System.out.println("ADDED VEIW COUNTER");
                             feederData.viewerCount++;
                             break;
 
+                        // If a user logged off, reduce the viewer count.    
                         case "REMOVE_WATCHER":
-                            System.out.println("REMOVED VEIW COUNTER");
                             feederData.viewerCount--;
                             break;
                     }
                 }
 
-                @Override
-                public void onClose(int code, String reason, boolean remote) {
-                    // ServerManager.consolePrint(AGENT, "WEBSOCKET DISCONNECTED", ServerManager.RED);
-                }
+                // Method for what to do on disconnection.
 
                 @Override
-                public void onError(Exception ex) {
+                public void onClose(int code, String reason, boolean remote) {
+                    ServerManager.consolePrint(AGENT, "WEBSOCKET DISCONNECTED", ServerManager.RED);
                 }
+
+
+                // Method for what to do on error.
+
+                @Override
+                public void onError(Exception ex) {}
             };
 
         }
@@ -329,11 +353,14 @@ public class Agent {
 
     }
 
+
+    // == FEEDERDATA CLASS (DATA) ===================================
+
     static class FeederData {
 
-        String type = "FEEDER_DATA";
+        String type = "FEEDER_DATA"; // For ID-ing a serialized version of this.
         int viewerCount;
-        String encodedImage;
+        String encodedImage; // In base64.
         String formattedLastTimeFed;
 
         public FeederData() {

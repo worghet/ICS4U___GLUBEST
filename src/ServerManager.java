@@ -1,42 +1,42 @@
-package backend.runnables;
-
-import java.io.Console;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.java_websocket.WebSocket;
-import org.java_websocket.client.WebSocketClient;
+// == IMPORTS ======================================
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import org.java_websocket.WebSocket;
+import java.net.InetSocketAddress;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.net.ServerSocket;
+import java.io.OutputStream;
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.io.File;
 
-import backend.user.User;
-
+// == SERVER MANAGER =======
 public class ServerManager {
-
-    final static Gson gson = new Gson();
-    private static ArrayList<WebSocket> activeWatchers = new ArrayList<>();
-    private static WebSocket agentSocket;
-
-    // Actual Servers.
+    
+    // Actual Servers and their respective ports.
 
     private static HttpServer httpServer;
     private static WebSocketServer webSocketServer;
-
     private static int HTTPSERVER_PORT = 8000;
     private static int WEBSOCKET_PORT = 8090;
+
+    // Some useful stuff.
+
+    final static Gson gson = new Gson(); // To interpret stuff.
+    private static ArrayList<WebSocket> activeWatchers = new ArrayList<>(); // Client connections.
+    private static WebSocket agentSocket; // Connection to the agent.
+
+    // Endpoints for HTTP server
+
+    private static final String MAIN_PAGE_API = "/glubest";
+    private static final String FEEDER_PAGE_API = "/feeder";
+    private static final String FEED_REQUEST_API = "/feed-request";
 
     // Logging codes.
 
@@ -51,21 +51,24 @@ public class ServerManager {
     public static final String CYAN = "\033[1;36m";
     public static final String WHITE = "\033[1;37m";
 
+    // Main to be run on the remote server (AWS).
     public static void main(String[] args) {
 
+        // Log setup.
         System.out.println("|========================================================|");
         System.out.println("|===== SERVER =====|=============== SETUP ===============|");
 
+        // Start servers.
         initializeServers();
 
+        // Log "log"s.
         System.out.println("|===== SERVER =====|================ LOG ================|");
-
-        // start servers here
 
     }
 
     public static void consolePrint(String LOGGED_SERVER_CONSTANT, String message, String COLOUR_CONSTANT) {
 
+        // Print the message in the requested color with a preset.
         System.out.println("|    " + WHITE + LOGGED_SERVER_CONSTANT + "   " + COLOUR_RESET_CONSTANT + " | "
                 + COLOUR_CONSTANT + message + COLOUR_RESET_CONSTANT);
 
@@ -75,11 +78,15 @@ public class ServerManager {
 
         boolean portAvailible;
 
+        // Essentially try to run a server on that port first and see if anything goes wrong.
         try (ServerSocket socket = new ServerSocket(requestedPort)) {
 
             portAvailible = true;
 
-        } catch (Exception e) {
+        } 
+
+        // If anything goes wrong, assume the port is taken.
+        catch (Exception e) {
 
             portAvailible = false;
 
@@ -90,36 +97,38 @@ public class ServerManager {
 
     private static void initializeServers() {
 
+        // Initialize the HTTP server.
         initializeHttpServer();
 
+        // Initialize the WebSocket server.
         initializeWebSocketServer();
 
     }
 
-    private static final String MAIN_PAGE_API = "/glubest";
-    private static final String FEEDER_PAGE_API = "/feeder";
-
-    private static final String FEED_REQUEST_API = "/feed-request";
-
     private static void initializeHttpServer() {
 
+        // Ensure that the port is availible.
         if (isPortAvailable(HTTPSERVER_PORT)) {
 
+            // Start attempt to setup the server.
             try {
 
+                // Create the server.
                 httpServer = HttpServer.create(new InetSocketAddress(HTTPSERVER_PORT), 0);
 
-                // add apis:
+                // Add endpoints.
 
                 httpServer.createContext("/", new StaticFileHandler());
 
-                httpServer.createContext("/feed-request", new HttpHandler() {
+                httpServer.createContext(FEED_REQUEST_API, new HttpHandler() {
                     @Override
                     public void handle(HttpExchange exchange) throws IOException {
-                        String response = "Feed endpoint reached!";
-
+                        
+                        // Notify agent of request.
                         agentSocket.send(Agent.FEED_KEYWORD);
 
+                        // Can simplify by just sending 200 code.
+                        String response = "Feed endpoint reached!";
                         exchange.sendResponseHeaders(200, response.getBytes().length);
                         try (OutputStream os = exchange.getResponseBody()) {
                             os.write(response.getBytes());
@@ -127,39 +136,48 @@ public class ServerManager {
                     }
                 });
 
+                // Not too sure what this is, keeping it here from last project.
                 httpServer.setExecutor(null);
 
+                // Start the server.
                 httpServer.start();
-                consolePrint(HTTPSERVER, "OK (AVAILABLE AT [LINK GOES HERE])", GREEN);
 
-            } catch (Exception exception) {
+                // Log the initialization; address is currently hardcoded.
+                consolePrint(HTTPSERVER, "OK (" + "18.218.44.44:" + HTTPSERVER_PORT + ")", GREEN);
+
+            }
+             
+            // If anything goes wrong, let console know.
+            catch (Exception exception) {
                 consolePrint(HTTPSERVER, "FAILED (" + exception.getMessage() + ")", GREEN);
             }
 
-        } else {
+        } 
+        
+        // If server port is unavailible, let console know.
+        else {
             consolePrint(HTTPSERVER, "FAILED (PORT UNAVAILABLE)", RED);
         }
     }
 
     static class StaticFileHandler implements HttpHandler {
 
+        // *** CHATGPT WROTE THIS HANDLE SEGMENT ***
+
         @Override
         public void handle(HttpExchange exchange) throws IOException {
     
-            // Get the requested path from the URL
+            // Get the requested path from the URL.
             String requestedPath = exchange.getRequestURI().getPath();
     
-            // Route remapping
+            // Route remapping.
             switch (requestedPath) {
                 case "/":
-                case "/glubest":
+                case MAIN_PAGE_API:
                     requestedPath = "index.html";
                     break;
-                case "/feeder":
+                case FEEDER_PAGE_API:
                     requestedPath = "feeder/feeder.html";
-                    break;
-                case "/chatroom":
-                    requestedPath = "chatroom/chatroom.html";
                     break;
                 default:
                     if (requestedPath.startsWith("/resources/")) {
@@ -168,14 +186,15 @@ public class ServerManager {
                     break;
             }
     
-            // Locate the file
+            // Locate the file.
             String projectRoot = System.getProperty("user.dir");
             File file = new File(projectRoot, "frontend/" + requestedPath);
             System.out.println("User requested: " + file.getAbsolutePath());
     
+            // Ensure the file exists.
             if (file.exists() && !file.isDirectory()) {
     
-                // Guess MIME type
+                // Guess MIME type.
                 String contentType = guessContentType(file.getName());
                 exchange.getResponseHeaders().add("Content-Type", contentType);
     
@@ -214,97 +233,120 @@ public class ServerManager {
             return "application/octet-stream"; // Default fallback
         }
     }
-    
 
     private static void initializeWebSocketServer() {
 
+        // Ensure the port is availible.
         if (isPortAvailable(WEBSOCKET_PORT)) {
 
+            // Attempt initialization.
             try {
 
+                // Initialize server.
                 webSocketServer = new WebSocketServer(new InetSocketAddress(WEBSOCKET_PORT)) {
+
+                    // What to do when someone connects.
 
                     @Override
                     public void onOpen(WebSocket conn, ClientHandshake handshake) {
 
-                        // Identify agent based on first message (or other logic)
-                        if (handshake.getResourceDescriptor().contains("agent")) { // Optional condition
+                        // Identify if the logged in entity is the agent | yes, this is a vulnerability.
+                        if (handshake.getResourceDescriptor().contains("agent")) { 
                             consolePrint(WEBSOCKET, "AGENT CONNECTED", BLUE);
                             agentSocket = conn;
-                        } else {
+                        } 
+                        
+                        // If its just a plain user.
+                        else {
 
-                            // prolly use login + session storage to recognize users on load
-
+                            // Add them to the list of online users.
                             activeWatchers.add(conn);
 
+                            // Notify console of new connection.
                             consolePrint(WEBSOCKET, "CLIENT CONNECTED", CYAN);
+                            
+                            // Update the feeder data to increment viewers.
                             agentSocket.send("ADD_WATCHER");
                         }
 
                     }
 
+                    // What to do if a connection is closed.
+
                     @Override
                     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
 
-                        // System.out.println("onclose called");
-
-                        if (agentSocket.equals(conn)) {
+                        // If the disconnected entity is the agent socket.
+                        if (agentSocket.equals(conn)) {                            
                             agentSocket = null;
                             consolePrint(WEBSOCKET, "AGENT DISCONNECTED", YELLOW);
-                        } else {
+                        } 
+                        
+                        // If it is just a user. 
+                        else {
+
+                            // Notify console.
                             consolePrint(WEBSOCKET, "CLIENT DISCONNECTED", CYAN);
+                            
+                            // Reduce viewer count in feeder data.
                             agentSocket.send("REMOVE_WATCHER");
+
+                            // Remove address from the list of active users.
                             activeWatchers.remove(conn);
                         }
 
                     }
 
+                    // What to do when a message is recieved.
+
                     @Override
                     public void onMessage(WebSocket conn, String message) {
 
+                        // Get the message type by deserializing it (I know, I know, could have optimized it here).
                         JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
                         String messageType = jsonObject.get("type").getAsString();
 
+                        // Interpret what kind of message was recieved.
                         switch (messageType) {
+
+                            // If it is just the feeder data.
                             case "FEEDER_DATA":
-                                // broadcast(message);
-                                // System.out.println("feeder message size: " + message.length());
+                                
+                                // Send only to the active users; ignore the agent connection.
                                 for (WebSocket watcher : activeWatchers) {
                                     if (!watcher.equals(agentSocket)) {
-                                        // System.out.println("sent " + message);
                                         watcher.send(message);
                                     }
                                 }
-                                // broadcast only to WATCHERS (memory :::)
-                                // for (WebSocket userSocket : activeUsers.keySet()) {
-                                // User user = activeUsers.get(userSocket);
-                                // if (User.CAT_WATCHING.equals(user.getCurrentlyDoing())) { // Send to Watchers
-                                // only
-                                // userSocket.send(message); // Send the feed data
-                                // }
-                                // }
                         }
 
                     }
 
                     @Override
-                    public void onError(WebSocket conn, Exception ex) {
-                    }
+                    public void onError(WebSocket conn, Exception ex) {}
 
                     @Override
-                    public void onStart() {
-                    }
+                    public void onStart() {}
 
                 };
 
+                // Start the server.
                 webSocketServer.start();
+
+                // Notify that the server is up.
                 consolePrint(WEBSOCKET, "OK", GREEN);
 
-            } catch (Exception exception) {
+            } 
+            
+            // If anything goes wrong in the setup process, notify why.
+            catch (Exception exception) {
                 consolePrint(WEBSOCKET, "FAILED (" + exception.getMessage() + ")", GREEN);
             }
 
-        } else {
+        } 
+        
+        // If port is unavailable, let console know.
+        else {
             consolePrint(WEBSOCKET, "FAILED (PORT UNAVAILABLE)", RED);
         }
 

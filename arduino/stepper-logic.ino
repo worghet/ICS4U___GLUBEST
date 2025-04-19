@@ -6,13 +6,16 @@
 const int STEPS_PER_REVOLUTION = 2048;
 const int STEPPER_SPEED = 4;
 
-// Initialize the stepper object.
-Stepper stepper = Stepper(STEPS_PER_REVOLUTION, 8, 10, 9, 11);
+// Declare Stepper.
+Stepper stepper;
 
 void setup() {
 
   // Open a serial to read from.
   Serial.begin(9600);
+
+  // Initialize the Stepper object.
+  stepper = Stepper(STEPS_PER_REVOLUTION, 8, 10, 9, 11);
 
   // Set the speed of the motor.
   stepper.setSpeed(STEPPER_SPEED);
@@ -21,19 +24,14 @@ void setup() {
 
 void loop() {
 
-  //    stepper.step(STEPS_PER_REVOLUTION);
-
   // Check if anything had been entered into the console.
   if (Serial.available()) {
 
     // Read the string sent by the Agent.
     String input = Serial.readString();
-    //    input.trim();
-    //    Serial.println(String(input) + " called");
 
-    // (Technically unnessicary) Ensure feed matches requested one.
+    // (Technically unnessicary) Ensure keyword matches requested one.
     if (input == "FEED") {
-      //          Serial.println("feeding the cat");
       stepper.step(STEPS_PER_REVOLUTION / 7);
     }
   }

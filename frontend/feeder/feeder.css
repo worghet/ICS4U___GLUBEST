@@ -1,4 +1,3 @@
-/* General styles */
 body {
     background-color: gainsboro;
     margin: 0;
@@ -90,12 +89,12 @@ body {
     margin: 0;
     padding: 0;
     font-family: monospace;
-    font-size: 8em;  /* Smaller title */
+    font-size: 8em; 
     font-weight: bold;
 }
 
 .subtitle {
-    font-size: 5.8em;  /* Smaller subtitle */
+    font-size: 5.8em; 
     margin-bottom: 10%;
 }
 
@@ -152,21 +151,22 @@ body {
     height: 8%;
 }
 
-/* Mobile responsive styles */
+/* for mobile stuff */
+
 @media (max-width: 768px) {
-    /* Stack sections vertically on mobile */
+ 
     body {
         display: flex;
         flex-direction: column;
         overflow: none;
-        /* justify-content: flex-start; */
+ 
     }
 
     .left-section, .right-section {
         width: 100%;
         padding: 10px;
         margin: 0;
-        /* justify-content: flex-start; */
+        
     }
 
     .window {
@@ -177,7 +177,6 @@ body {
         border-radius: 5px;
     }
 
-    /* Adjust the button size */
     .button {
         position: absolute;
         top: 85%;
@@ -186,16 +185,13 @@ body {
         margin: 0;
     }
 
-    /* Hide back and pause buttons on mobile */
     .back-to-feed-button,
     .pause-unpause-button {
         display: none;
     }
 
-    /* Video feed will take more height */
     .bottom-bar {
         margin: 0;
-        /* margin-top: -50px; */
         height: 40vh;
         border-radius: 2px;
         font-size: 2em;
@@ -207,16 +203,14 @@ body {
         display: none;
     }
 
-    /* Adjust title for mobile */
     .video-feed-title {
         margin-top: -50px;
-        font-size: 6em;  /* Smaller title for mobile */
+        font-size: 6em; 
     }
 
     .subtitle {
         margin-top: 5px;
-        font-size: 4.5em;  /* Smaller subtitle for mobile */
-        /* margin- */
+        font-size: 4.5em; 
     }
 
  

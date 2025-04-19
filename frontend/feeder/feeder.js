@@ -8,7 +8,7 @@ const VIDEO_FEED_BOX = document.getElementById("video-feed-box");
 const VIEWER_COUNT_ELEMENT = document.getElementById("viewer-count");
 const LAST_FED_ELEMENT = document.getElementById("last-fed");
 const click = new Audio("/resources/click.wav")
-const meow = new Audio("/resources/meow.mp3")  
+const meow = new Audio("/resources/meow.mp3")
 
 
 
@@ -17,48 +17,51 @@ const meow = new Audio("/resources/meow.mp3")
 
 // This method runs when the page is loaded.
 window.onload = function () {
+
+    // WEBSOCKET CONNECTION SETUP
+
+    // Try to establish connection.
     try {
-        // Setup the actual connection.
         setupWebsocketClient();
         console.log("SUCCESSFULLY CONNECTED TO: ", FEEDER_API);
-    } catch (exception) {
+    }
+
+    // If anything goes wrong, let console know.
+    catch (exception) {
         console.log("FAILED TO CONNECT TO: ", FEEDER_API);
     }
 
-    const audio = document.getElementById("bg-music");
-    audio.volume = 0.4;
+    // MUSIC (AUDIO) SETUP
 
+    // Try to pull the saved time if exists (if not fallback on 0)
     const savedTime = parseFloat(localStorage.getItem("glubest_audio_time")) || 0;
 
-   console.log(document.getElementById("bg-music"));
+    // Get the audio.
+    const audio = document.getElementById("bg-music");
 
-   
-        console.log('mtdata loaded')
-        if (localStorage.getItem("bg-playing") == "true") {
-            audio.play();  // Start playing after setting the currentTime
-            console.log(localStorage.getItem("glubest_audio_time"));
+    // Adjust volume.
+    audio.volume = 0.4;
 
-            audio.currentTime = savedTime;//localStorage.getItem("glubest_audio_time");
-           
-        }
+    // If the audio was playing in the other menu.
+    if (localStorage.getItem("bg-playing") == "true") {
+        
+        // Play the audio.
+        audio.play();  
 
-    // Set the starting time when the audio starts playing
-    setInterval(() => {
-        console.log(audio.currentTime);
-    }, 1000);
+        // Set the time to the timestamp from leaving other page.
+        audio.currentTime = savedTime;
+
+    }
 };
 
-
-// audio.currentTime = 20;// localStorage.getItem("glubest_audio_time");  // Set the time before playing
-// console.log(audio.currentTime);  // Should log '20'
-
+// What to do when we leave this page.
 window.onclose = function () {
 
-    // On exiting / closing the page; disconnect the socket.
+    // Disconnect the socket.
     SOCKET.close();
 
+    // Save the time of the audio playing.
     localStorage.setItem("glubest_audio_time", audio.currentTime);
-
 
 }
 
@@ -103,6 +106,7 @@ function setupWebsocketClient() {
 
 function sendFeedRequest() {
 
+    // Play the meow sound.
     meow.play();
 
     // Send a simple HTTP request to the server, 
@@ -117,8 +121,9 @@ function sendFeedRequest() {
 
 function backToMainMenu() {
 
+    // Play the click sound.
     click.play();
 
-    // Just changes the location to the main page.
+    // Change the browser location to the main page.
     window.location.href = "/glubest";
 }
